@@ -1,0 +1,33 @@
+{
+    "name": "HateNet",
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "permissions": [
+        "storage",
+        "tabs",
+        "activeTab",
+        "scripting"
+    ],
+    "action": {
+        "default_popup": "/build/index.html",
+        "default_icon": {
+            "16": "/images/twitter.png"
+        }
+    },
+    "icons": {
+        "16": "/images/twitter.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://twitter.com/*"
+            ],
+            "css": [
+                "styles.css"
+            ],
+            "js": [
+                "content-script.js"
+            ]
+        }
+    ]
+}
