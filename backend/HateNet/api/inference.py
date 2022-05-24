@@ -1,5 +1,4 @@
 from io import BytesIO
-from pydoc import describe
 from flask import Blueprint, abort, current_app, jsonify, request
 import numpy as np
 import requests

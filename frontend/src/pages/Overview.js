@@ -32,7 +32,7 @@ const Overview = () => {
         if (project && aggregate[project.name] && aggregate[project.name]['all']) {
             updateTrend(aggregate[project.name]['all'].aggregate, filter.activity.time);
         }
-    }, [aggregate, project, filter.activity.time])
+    }, [aggregate, project, filter]);
 
     useEffect(() => {
         if (!project) {
@@ -44,9 +44,9 @@ const Overview = () => {
             }
         } else {
             fetchProgress(project.name);
-            fetchAggregate(project.name);
+            fetchAggregate(project.name, "all");
         }
-    }, [projects])
+    }, [projects]);
 
     const handleSelectProject = (project) => {
         reset();

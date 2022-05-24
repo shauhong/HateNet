@@ -42,9 +42,14 @@ const Monitor = () => {
     useEffect(() => {
         if (selectedUser && project && monitor[project.name] && monitor[project.name][selectedUser.username]) {
             updateDistribution(monitor[project.name][selectedUser.username], filter.distribution.time);
+        }
+    }, [selectedUser, project, filter.distribution.time, monitor]);
+
+    useEffect(() => {
+        if (selectedUser && project && monitor[project.name] && monitor[project.name][selectedUser.username]) {
             updateTrend(monitor[project.name][selectedUser.username], filter.trend.time, filter.trend.type !== 'All' ? filter.trend.type : null);
         }
-    }, [selectedUser, project, filter, monitor]);
+    }, [selectedUser, project, filter.trend.time, filter.trend.type, monitor]);
 
     useEffect(() => {
         if (!project) {

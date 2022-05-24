@@ -16,7 +16,7 @@ def create_app():
     api.init(app)
     database.init(app)
     models.init(app)
-    # scheduler.init(app)
+    scheduler.init(app)
 
     return app
 

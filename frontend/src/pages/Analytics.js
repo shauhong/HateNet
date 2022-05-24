@@ -59,24 +59,44 @@ const Analytics = () => {
             }
             setAuthors([...updated]);
         }
-    }, [author])
+    }, [author]);
 
     useEffect(() => {
         if (project && aggregate[project.name] && aggregate[project.name]['all']) {
             updateTrend(aggregate[project.name]['all'].aggregate, filter.trend.time, filter.trend.type !== "All" ? filter.trend.type : null);
+        }
+    }, [aggregate, project, filter.trend.time, filter.trend.type]);
+
+    useEffect(() => {
+        if (project && aggregate[project.name] && aggregate[project.name]['all']) {
             updateDistribution(aggregate[project.name]['all'].aggregate, filter.distribution.time);
+        }
+    }, [aggregate, project, filter.distribution.time]);
+
+    useEffect(() => {
+        if (project && aggregate[project.name] && aggregate[project.name]['all']) {
             updateGeography(aggregate[project.name]['all'].aggregate, 'location', filter.geography.time, filter.geography.type !== 'All' ? filter.geography.type : null);
-            updateAuthor(aggregate[project.name]['all'].aggregate, 'author', filter.author.time, filter.author.type !== 'All' ? filter.author.type : null);
-            const documents = getDocuments(aggregate[project.name]['all'].aggregate, filter.trend.time);
+        }
+    }, [aggregate, project, filter.geography.time, filter.geography.type]);
+
+    useEffect(() => {
+        if (project && aggregate[project.name] && aggregate[project.name]['all']) {
+            const documents = getDocuments(aggregate[project.name]['all'].aggregate, filter.term.time);
             fetchTFIDF(project.name, "all", filter.term.time, documents);
         }
-    }, [aggregate, project, filter])
+    }, [aggregate, project, filter.term.time, filter.term.type]);
+
+    useEffect(() => {
+        if (project && aggregate[project.name] && aggregate[project.name]['all']) {
+            updateAuthor(aggregate[project.name]['all'].aggregate, 'author', filter.author.time, filter.author.type !== 'All' ? filter.author.type : null);
+        }
+    }, [aggregate, project, filter.author.time, filter.author.type]);
 
     useEffect(() => {
         if (project && TFIDF[project.name] && TFIDF[project.name]["all"] && TFIDF[project.name]["all"][filter.term.time.toLowerCase()]) {
             updateTFIDF(TFIDF[project.name]["all"][filter.term.time.toLowerCase()], filter.term.type !== "All" ? filter.term.type : null);
         }
-    }, [TFIDF, filter, project])
+    }, [TFIDF, filter, project]);
 
     useEffect(() => {
         if (!project) {
@@ -88,7 +108,7 @@ const Analytics = () => {
         } else {
             fetchAggregate(project.name, 'all')
         }
-    }, [projects])
+    }, [projects]);
 
     const handleSelect = (project) => {
         resetTrend();

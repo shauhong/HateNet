@@ -44,7 +44,6 @@ const Timeline = () => {
     }
 
     const store = () => {
-        console.log(containerRef.current.scrollTop);
         window.history.pushState({ position: containerRef.current.scrollTop }, "");
     }
 

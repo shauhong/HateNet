@@ -1,6 +1,6 @@
 const PostSkeleton = ({ even, loading }) => {
     return (
-        <div className={`${loading && "animate-pulse"} w-full max-w-xs md:max-w-lg bg-white border rounded-3xl p-6 mx-auto`}>
+        <div className={`${loading && "animate-pulse"} w-full max-w-xs md:max-w-xl bg-white border rounded-3xl p-6 mx-auto`}>
             <div className="flex flex-start gap-4">
                 <div className="w-12 h-12 bg-gray-200 rounded-full">
                 </div>
