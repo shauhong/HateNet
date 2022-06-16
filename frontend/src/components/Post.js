@@ -11,8 +11,9 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
     const [toggle, setToggle] = useState(false);
     const [explain, setExplain] = useState({
         attention: [],
-        tokens: [],
-        boxes: [],
+        mask: null,
+        // tokens: [],
+        // boxes: [],
     });
     const canvasRef = useRef(null);
     const imgRef = useRef(null);
@@ -20,7 +21,8 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
     const { closeModal } = useGlobal();
     const { explainText, explainMultimodal, loading } = useData();
     const colorMap = {
-        0: "#f0f9ff",
+        // 0: "#f0f9ff",
+        0: "#ffffff",
         1: "#e0f2fe",
         2: "#bae6fd",
         3: "#7dd3fc",
@@ -38,6 +40,7 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
         if (canvas) {
             let image = new Image();
             image.src = tweet.media[0].url;
+            console.log(tweet.media[0].url)
             const context = canvas.getContext("2d");
             image.onload = () => {
                 canvas.height = image.height;
@@ -49,22 +52,38 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (canvas) {
+        if (canvas && explain.mask) {
+            let image = new Image();
+            image.src = `data:image/jpeg;base64,${explain.mask}`;
             const context = canvas.getContext("2d");
-            explain.boxes.forEach((box, index) => {
-                const attention = Math.floor(explain.attention.slice(explain.tokens.length)[index] * 10);
-                context.fillStyle = colorMap[attention];
-                context.globalAlpha = 0.5;
-                const [x1, y1, x2, y2] = box;
-                const w = x2 - x1;
-                const h = y2 - y1
-                context.fillRect(x1, y1, w, h);
-            });
+            context.globalAlpha = 0.2;
+            // console.log(image);
+            // context.drawImage(image, 0, 0);
+            image.onload = () => {
+                console.log(image)
+                context.drawImage(image, 0, 0)
+            };
         }
-    }, [explain.boxes]);
+    }, [explain.mask])
 
-    const handleError = () => {
-        imgRef.current.src = logo;
+    // useEffect(() => {
+    //     const canvas = canvasRef.current;
+    //     if (canvas) {
+    //         const context = canvas.getContext("2d");
+    //         explain.boxes.forEach((box, index) => {
+    //             const attention = Math.floor(explain.attention.slice(explain.tokens.length)[index] * 10);
+    //             context.fillStyle = colorMap[attention];
+    //             context.globalAlpha = 0.5;
+    //             const [x1, y1, x2, y2] = box;
+    //             const w = x2 - x1;
+    //             const h = y2 - y1
+    //             context.fillRect(x1, y1, w, h);
+    //         });
+    //     }
+    // }, [explain.boxes]);
+
+    const handleError = (e) => {
+        e.target.src = logo;
     }
 
     const handleToggle = (e) => {
@@ -86,15 +105,18 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
     const handleExplain = async (e) => {
         e.stopPropagation();
         if (tweet.media.length === 1) {
-            let { attention, tokens, boxes } = await explainMultimodal(tweet.text, tweet.media[0].url);
-            attention = [...attention.slice(1, tokens.length - 1), ...attention.slice(tokens.length)];
-            tokens = tokens.slice(1, tokens.length - 1);
-            setExplain({ attention, tokens, boxes });
+            let { attention, mask } = await explainMultimodal(tweet.text, tweet.media[0].url);
+            // attention = [...]
+            // attention = [...attention.slice(1, tokens.length - 1), ...attention.slice(tokens.length)];
+            // tokens = tokens.slice(1, tokens.length - 1);
+            setExplain({ attention, mask });
         } else {
             let { attention, tokens } = await explainText(tweet.text);
-            attention = attention.slice(1, attention.length - 1);
-            attention = attention.map(element => element * 10);
-            tokens = tokens.slice(1, tokens.length - 1);
+            // attention = attention.slice(1, attention.length - 1);
+            // attention = attention.map(element => element * 10);
+            // tokens = tokens.slice(1, tokens.length - 1);
+            console.log(attention);
+            console.log(tokens);
             setExplain({ ...explain, attention, tokens });
         }
     }
@@ -143,14 +165,20 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                                 {
                                     explain.attention.length > 0
                                         ? tweet.text.split(" ").map((element, index) => {
-                                            let weight = Math.max(Math.floor(explain.attention[index] * 10) - 1, 0);
+                                            console.log(explain.attention[index]);
+                                            // let weight = Math.max(Math.floor(explain.attention[index] * 10) - 1, 0);
+                                            let weight = Math.floor(explain.attention[index] * 10);
+                                            // let weight = explain.attention[index];
                                             weight = Math.min(weight, 9);
-                                            weight = weight * 100;
+                                            // weight = weight * 100;
+                                            console.log(element);
+                                            // console.log(weight);
                                             return (
-                                                <>
-                                                    <span className={`bg-sky-${weight} rounded-md`}>{element}</span>
+                                                <div className="inline" key={index}>
+                                                    {/* <span style={{ backgroundColor: colorMap[weight] }} className={`bg-slate-${weight} rounded-md z-30`}>{element}</span> */}
+                                                    <span style={{ backgroundColor: colorMap[weight] }} className="rounded-md z-30">{element}</span>
                                                     <span> </span>
-                                                </>
+                                                </div>
                                             );
                                         })
                                         : tweet.text

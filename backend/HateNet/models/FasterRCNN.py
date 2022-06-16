@@ -6,7 +6,7 @@ from torchvision.ops import boxes as box_ops
 
 
 class FasterRCNN(nn.Module):
-    def __init__(self, extract=False, output_detections=False):
+    def __init__(self, extract=False, output_detections=False, **kwargs):
         super().__init__()
         self.fasterrcnn = torchvision.models.detection.fasterrcnn_resnet50_fpn(
             pretrained=True)

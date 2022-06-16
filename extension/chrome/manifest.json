@@ -11,11 +11,11 @@
     "action": {
         "default_popup": "/build/index.html",
         "default_icon": {
-            "16": "/images/twitter.png"
+            "16": "/images/hate.png"
         }
     },
     "icons": {
-        "16": "/images/twitter.png"
+        "16": "/images/hate.png"
     },
     "content_scripts": [
         {

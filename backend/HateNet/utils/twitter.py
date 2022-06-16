@@ -564,7 +564,6 @@ def add_filtered_stream(project, params, headers):
     tag = f"{project.user.username}-{project.name}"
     delete_project_rules(project, headers)
     set_rules(project.query, tag, headers)
-    print(projects)
     if len(projects) == 0:
         project.streaming = True
         project.save()
@@ -582,7 +581,6 @@ def remove_filtered_stream(project, headers):
 
 
 def start_filtered_stream(params, headers):
-    print("start filtered stream")
     url = 'https://api.twitter.com/2/tweets/search/stream'
     response = requests.get(url, headers=headers, params=params, stream=True)
     if response.ok:
@@ -594,9 +592,7 @@ def start_filtered_stream(params, headers):
                     break
                 if line:
                     content = json.loads(line)
-                    print(content)
                     tweet = format_tweet(content)
-                    print(tweet)
                     for rule in content['matching_rules']:
                         username, name = rule['tag'].split("-")
                         user = User.objects(username=username).first()
@@ -672,7 +668,6 @@ def start_volume_stream(params, headers):
                     break
                 if line:
                     tweet = format_tweet(json.loads(line))
-                    print(tweet)
                     for project in projects:
                         save_tweet(tweet, project)
         except Exception as e:

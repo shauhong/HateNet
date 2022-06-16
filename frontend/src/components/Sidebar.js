@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useGlobal, useCache } from '../hooks'
 import { capitalize } from '../utils';
+import { ReactComponent as Logo } from '../assets/hate.svg';
 
 const Sidebar = ({ handleClick }) => {
     const { auth, logout } = useGlobal();
@@ -81,22 +82,7 @@ const Sidebar = ({ handleClick }) => {
     return (
         <div className="flex flex-col gap-6 h-screen bg-white py-11 px-4 w-16 items-center md:items-start md:w-48 border-r">
             <div className="flex items-ce3nter mb-8 md:px-4 gap-x-4">
-                <svg width="30" height="30" viewBox="0 0 32 32">
-                    <defs>
-                        <linearGradient x1="28.538%" y1="20.229%" x2="100%" y2="108.156%" id="gradient-a">
-                            <stop stopColor="#00aced" stopOpacity="0" offset="0%" />
-                            <stop stopColor="#00aced" offset="100%" />
-                        </linearGradient>
-                        <linearGradient x1="88.638%" y1="29.267%" x2="22.42%" y2="100%" id="gradient-b">
-                            <stop stopColor="#1DCAFF" stopOpacity="0" offset="0%" />
-                            <stop stopColor="#1DCAFF" offset="100%" />
-                        </linearGradient>
-                    </defs>
-                    <rect fill="#E8F5FD" width="32" height="32" rx="16" />
-                    <path d="M18.277.16C26.035 1.267 32 7.938 32 16c0 8.837-7.163 16-16 16a15.937 15.937 0 01-10.426-3.863L18.277.161z" fill="#E8F5FD" />
-                    <path d="M7.404 2.503l18.339 26.19A15.93 15.93 0 0116 32C7.163 32 0 24.837 0 16 0 10.327 2.952 5.344 7.404 2.503z" fill="#1DA1F2" />
-                    <path d="M2.223 24.14L29.777 7.86A15.926 15.926 0 0132 16c0 8.837-7.163 16-16 16-5.864 0-10.991-3.154-13.777-7.86z" fill="#0084B4" />
-                </svg>
+                <Logo className="w-8 h-8" />
                 <span className="text-xl font-semibold hidden md:block">
                     HateNet
                 </span>

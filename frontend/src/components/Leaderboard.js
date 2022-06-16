@@ -4,8 +4,10 @@ import logo from '../assets/logo.svg';
 const Leaderboard = ({ users, monitor, updateMonitor, loading }) => {
     const imgRef = useRef(null);
 
-    const handleError = () => {
-        imgRef.current.src = logo;
+    const handleError = (e) => {
+        // console.log("handle error");
+        // imgRef.current.src = logo;
+        e.target.src = logo
     }
 
     return (
@@ -36,12 +38,13 @@ const Leaderboard = ({ users, monitor, updateMonitor, loading }) => {
                             <div className={monitor ? "col-span-8 flex items-center gap-x-4" : "col-span-10 flex items-center gap-x-4"}>
                                 <span className="text-lg font-medium">{users.indexOf(user) + 1}</span>
                                 <img
-                                    loading='lazy'
+                                    // loading='lazy'
+                                    onError={handleError}
                                     ref={imgRef}
                                     src={user.profile_image_url}
                                     alt=""
                                     className="rounded-full w-12 h-auto object-contain"
-                                    onError={handleError}
+                                // onError={handleError}s
                                 />
                                 <div className="flex-1 overflow-hidden">
                                     <p className="text-lg font-semibold overflow-hidden whitespace-nowrap text-ellipsis">{user.name}</p>

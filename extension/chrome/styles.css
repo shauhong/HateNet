@@ -63,6 +63,20 @@
 
 }
 
+.btn:hover::after {
+    content: "Detect";
+    position: absolute;
+    background-color: white;
+    border: 1px solid white;
+    border-radius: 0.25rem;
+    margin-left: 16px;
+    font-size: 12px;
+    font-family: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 20px;
+    padding: 2px 3px;
+    left: 100%;
+}
+
 .btn:hover .icon {
     fill: #0ea5e9;
 }
@@ -97,8 +111,10 @@
     background-color: white;
     border: 1px solid white;
     border-radius: 0.25rem;
-    margin-left: 8px;
-    font: inherit;
+    margin-left: 16px;
+    font-size: 12px;
+    font-family: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 20px;
     padding: 2px 3px;
     left: 100%;
 }
@@ -113,8 +129,10 @@
     background-color: white;
     border: 1px solid white;
     border-radius: 0.25rem;
-    margin-left: 8px;
-    font: inherit;
+    margin-left: 16px;
+    font-size: 12px;
+    font-family: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 20px;
     padding: 2px 3px;
     left: 100%;
 }
