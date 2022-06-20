@@ -414,12 +414,15 @@ const useData = () => {
             if (!response.ok) {
                 throw new Error(`HTTP error: ${response.status}`);
             }
-            const { attention, tokens } = await response.json();
-            console.log(attention.reduce((total, ele) => total + ele, 0))
-            console.log(attention)
-            console.log(tokens);
+            const { attentions } = await response.json();
+            console.log(attentions);
+            // const { attention, tokens } = await response.json();
+            console.log(attentions.reduce((total, ele) => total + ele[1], 0))
+            // console.log(attentions)
+            // console.log(tokens);
             setLoading({ ...loading, explain: false });
-            return { attention, tokens }
+            return { attentions };
+            // return { attention, tokens }
         } catch (error) {
             const message = {
                 type: "fail",
@@ -446,13 +449,15 @@ const useData = () => {
             if (!response.ok) {
                 throw new Error(`HTTP error: ${response.status}`);
             }
-            const { attention, mask } = await response.json()
+            const { attentions, mask } = await response.json();
+            // console.log(attentions);
+            // console.log(mask);
             // console.log(attention);
             // console.log(mask);
             // const { attention, tokens, boxes } = await response.json();
             setLoading({ ...loading, explain: false });
             // return { attention, tokens, boxes }
-            return { attention, mask }
+            return { attentions, mask }
         } catch (error) {
             const message = {
                 type: "fail",

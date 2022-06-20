@@ -30,6 +30,7 @@ const Overview = () => {
 
     useEffect(() => {
         if (project && aggregate[project.name] && aggregate[project.name]['all']) {
+            console.log(aggregate)
             updateTrend(aggregate[project.name]['all'].aggregate, filter.activity.time);
         }
     }, [aggregate, project, filter]);
@@ -40,7 +41,7 @@ const Overview = () => {
             if (first) {
                 setProject(first);
                 fetchProgress(first.name);
-                fetchAggregate(first.name);
+                fetchAggregate(first.name, 'all');
             }
         } else {
             fetchProgress(project.name);

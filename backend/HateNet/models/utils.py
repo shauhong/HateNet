@@ -216,8 +216,141 @@ def normalize_attention(attention):
 #         attention = attention / np.sum(attention)
 
 #     return attention, mask
+def cluster_tokens(tokens, pattern="@@"):
+    tokens = deepcopy(tokens)
+    segments = list()
+    i = 0
+    while len(tokens) > 0:
+        token = tokens.pop(0)
+        if token.endswith(pattern):
+            segment = list()
+            segment.append(i)
+            while True:
+                i += 1
+                token = tokens.pop(0)
+                segment.append(i)
+                if not token.endswith(pattern):
+                    break
+            segments.append(segment)
+        else:
+            segments.append([i])
+        i += 1
+    return segments
 
-def attention_rollout_multimodal(attentions, image, shifted, patch_size, tokens, mode="mean", normalize=True):
+
+def cluster_tokens_bert(tokens, pattern="##"):
+    tokens = deepcopy(tokens)
+    segments = list()
+    i = len(tokens) - 1
+    while len(tokens) > 0:
+        token = tokens.pop()
+        if token.startswith(pattern):
+            segment = list()
+            segment.append(i)
+            while True:
+                i -= 1
+                token = tokens.pop()
+                segment.append(i)
+                if not token.startswith(pattern):
+                    break
+            segments.append(sorted(segment))
+        else:
+            segments.append([i])
+        i -= 1
+    segments = sorted(segments, key=lambda x: x[0])
+    return segments
+
+
+def combine_clusters(tokens, clusters):
+    cluster_tokens = list()
+    for cluster in clusters:
+        cluster_token = tokens[cluster[0]:cluster[-1]+1]
+        cluster_token = "".join(cluster_token)
+        cluster_token = re.sub("@@|##", "", cluster_token)
+        cluster_tokens.append(cluster_token)
+    return cluster_tokens
+
+
+def attention_unimodal(attentions, tokens, normalize=True, mask=True, return_tokens=True):
+    attentions = attentions[-1]
+    attentions = attentions.squeeze(0)
+    attentions = torch.mean(attentions, dim=0)
+    attentions = attentions[0, 1:-1]
+
+    clusters = cluster_tokens(tokens)
+    tokens = combine_clusters(tokens, clusters)
+
+    v = torch.tensor([torch.sum(attentions[cluster]) for cluster in clusters])
+
+    if mask:
+        for index, token in enumerate(tokens):
+            if token in ["RT", "@USER", "HTTPURL"]:
+                attentions[index] = 0
+
+    v = v[1:-1]
+
+    if normalize:
+        v = v / torch.sum(v)
+
+    v = v.tolist()
+
+    if return_tokens:
+        return list(zip(tokens[1:-1], v))
+
+    return v
+
+
+def attention_rollout_unimodal(attentions, tokens, mode="mean", normalize=True, mask=True, return_tokens=True):
+    attentions = torch.stack(attentions)  # 12, 1, 12, S, S
+    attentions = torch.squeeze(attentions, dim=1)  # 12, 12, S, S
+    if mode == 'mean':
+        attentions = torch.mean(attentions, dim=1)  # 12, S, S
+    elif mode == 'max':
+        attentions = torch.max(attentions, dim=1)[0]  # 12, S, S
+    elif mode == "min":
+        attentions = torch.min(attentions, dim=1)[0]  # 12, S, S
+    else:
+        raise NotImplementedError(f"Mode {mode} not implemented")
+
+    residual_attentions = torch.eye(attentions.shape[1])
+    augmented_attentions = attentions + residual_attentions
+    augmented_attentions = augmented_attentions / \
+        torch.sum(augmented_attentions, dim=-1)[..., None]
+    augmented_attentions = augmented_attentions.detach().numpy()
+
+    joint_attentions = np.zeros(augmented_attentions.shape)
+    joint_attentions[0] = augmented_attentions[0]
+
+    for i in range(1, augmented_attentions.shape[0]):
+        joint_attentions[i] = np.matmul(
+            augmented_attentions[i], joint_attentions[i-1])
+
+    v = joint_attentions[-1, 0]
+
+    clusters = cluster_tokens(tokens)
+    tokens = combine_clusters(tokens, clusters)
+
+    v = np.array([np.sum(v[cluster]) for cluster in clusters]).tolist()
+
+    if mask:
+        for index, token in enumerate(tokens):
+            if token in ['RT', "@USER", "HTTPURL"]:
+                v[index] = 0
+
+    v = v[1:-1]
+
+    if normalize:
+        v = v / np.sum(v)
+
+    v = v.tolist()
+
+    if return_tokens:
+        return list(zip(tokens[1:-1], v))
+
+    return v
+
+
+def attention_rollout_multimodal(attentions, image, shifted, patch_size, tokens, mode="mean", normalize=True, return_tokens=True, mask=True):
     attentions = torch.stack(attentions)  # 12, 1, 12, S, S
     attentions = torch.squeeze(attentions, dim=1)  # 12, 12, S, S
     if mode == 'mean':
@@ -248,27 +381,42 @@ def attention_rollout_multimodal(attentions, image, shifted, patch_size, tokens,
     v = joint_attentions[-1]
 
 #     mask = v[0, -patch_size[0]*patch_size[1]:]
-    mask = sort_shifted_attentions(
+    heatmap = sort_shifted_attentions(
         v[0, -patch_size[0] * patch_size[1]:], shifted)
 
     if normalize:
-        mask = mask / np.sum(mask)
-    mask = mask / mask.max()
-    mask = mask.reshape(patch_size[1], patch_size[0])
-    mask = cv2.resize(mask, image.size)
+        heatmap = heatmap / np.sum(heatmap)
+    heatmap = heatmap / heatmap.max()
+    heatmap = heatmap.reshape(patch_size[1], patch_size[0])
+    heatmap = cv2.resize(heatmap, image.size)
 
-    segments = segment_tokens_bert(tokens)
-    attention = np.zeros(len(segments))
-    for i, segment in enumerate(segments):
-        attention[i] = np.sum(v[0, segment])
+    clusters = cluster_tokens_bert(tokens)
+    tokens = combine_clusters(tokens, clusters)
+    attention = np.zeros(len(clusters))
+
+    for i, cluster in enumerate(clusters):
+        attention[i] = np.sum(v[0, cluster])
+
+    if mask:
+        for index, token in enumerate(tokens):
+            if token in ["rt", '@user', "httpurl", "@", "user"]:
+                attention[index] = 0
+
     attention = attention[1:-1]
+
     if normalize:
         attention = attention / np.sum(attention)
 
-    return attention, mask
+    attention = attention.tolist()
+
+    if return_tokens:
+        return list(zip(tokens[1:-1], attention)), heatmap
+#         return tokens, attention, mask
+
+    return attention, heatmap
 
 
-def attention_multimodal(attentions, image, shifted, patch_size, tokens, mode="mean", normalize=True):
+def attention_multimodal(attentions, image, shifted, patch_size, tokens, mode="mean", normalize=True, mask=True):
     attentions = torch.stack(attentions)  # 12, 1, 12, S, S
     attentions = torch.squeeze(attentions, dim=1)  # 12, 12, S, S
     if mode == 'mean':
@@ -286,24 +434,133 @@ def attention_multimodal(attentions, image, shifted, patch_size, tokens, mode="m
     # w_feat = resized.shape[1] // patch_size
 
     # mask = v[0, -h_feat*w_feat:]
-    mask = sort_shifted_attentions(
+    heatmap = sort_shifted_attentions(
         v[0, -patch_size[0] * patch_size[1]:], shifted)
 
     if normalize:
-        mask = mask / np.sum(mask)
-    mask = mask / mask.max()
-    mask = mask.reshape(patch_size[1], patch_size[0])
-    mask = cv2.resize(mask, image.size)
+        heatmap = heatmap / np.sum(heatmap)
+    heatmap = heatmap / heatmap.max()
+    heatmap = heatmap.reshape(patch_size[1], patch_size[0])
+    heatmap = cv2.resize(heatmap, image.size)
 
-    segments = segment_tokens_bert(tokens)
-    attention = np.zeros(len(segments))
-    for i, segment in enumerate(segments):
-        attention[i] = np.sum(v[0, segment])
+    clusters = cluster_tokens_bert(tokens)
+    attention = np.zeros(len(clusters))
+
+    for i, cluster in enumerate(clusters):
+        attention[i] = np.sum(v[0, cluster])
+
+    if mask:
+        for index, token in enumerate(tokens):
+            if token in ['rt', '@user', 'httpurl', '@', 'user']:
+                attention[index] = 0
+
     attention = attention[1:-1]
+
     if normalize:
         attention = attention / np.sum(attention)
 
-    return attention, mask
+    attention = attention.tolist()
+
+    return attention, heatmap
+
+# def attention_rollout_multimodal(attentions, image, shifted, patch_size, tokens, mode="mean", normalize=True):
+#     attentions = torch.stack(attentions)  # 12, 1, 12, S, S
+#     attentions = torch.squeeze(attentions, dim=1)  # 12, 12, S, S
+#     if mode == 'mean':
+#         attentions = torch.mean(attentions, dim=1)  # 12, S, S
+#     elif mode == 'max':
+#         attentions = torch.max(attentions, dim=1)[0]  # 12, S, S
+#     elif mode == "min":
+#         attentions = torch.min(attentions, dim=1)[0]  # 12, S, S
+#     else:
+#         raise NotImplementedError(f"Mode {mode} not implemented")
+
+#     residual_attentions = torch.eye(attentions.shape[1])
+#     augmented_attentions = attentions + residual_attentions
+#     augmented_attentions = augmented_attentions / \
+#         torch.sum(augmented_attentions, dim=-1)[..., None]
+#     augmented_attentions = augmented_attentions.detach().numpy().copy()
+
+#     joint_attentions = np.zeros(augmented_attentions.shape)
+#     joint_attentions[0] = augmented_attentions[0]
+
+#     for i in range(1, augmented_attentions.shape[0]):
+#         joint_attentions[i] = np.matmul(
+#             augmented_attentions[i], joint_attentions[i-1])
+
+# #     h_feat = resized.shape[0] // patch_size
+# #     w_feat = resized.shape[1] // patch_size
+
+#     v = joint_attentions[-1]
+
+# #     mask = v[0, -patch_size[0]*patch_size[1]:]
+#     mask = sort_shifted_attentions(
+#         v[0, -patch_size[0] * patch_size[1]:], shifted)
+
+#     if normalize:
+#         mask = mask / np.sum(mask)
+#     mask = mask / mask.max()
+#     mask = mask.reshape(patch_size[1], patch_size[0])
+#     mask = cv2.resize(mask, image.size)
+
+#     segments = segment_tokens_bert(tokens)
+#     attention = np.zeros(len(segments))
+#     for i, segment in enumerate(segments):
+#         attention[i] = np.sum(v[0, segment])
+#     attention = attention[1:-1]
+
+#     if normalize:
+#         attention = attention / np.sum(attention)
+
+#     attention = attention.tolist()
+
+#     return attention, mask
+
+
+# def attention_multimodal(attentions, image, shifted, patch_size, tokens, mode="mean", normalize=True):
+#     attentions = torch.stack(attentions)  # 12, 1, 12, S, S
+#     attentions = torch.squeeze(attentions, dim=1)  # 12, 12, S, S
+#     if mode == 'mean':
+#         attentions = torch.mean(attentions, dim=1)  # 12, S, S
+#     elif mode == 'max':
+#         attentions = torch.max(attentions, dim=1)[0]  # 12, S, S
+#     elif mode == "min":
+#         attentions = torch.min(attentions, dim=1)[0]  # 12, S, S
+#     else:
+#         raise NotImplementedError(f"Mode {mode} not implemented")
+#     attentions = attentions[-1]  # S, S
+#     v = attentions.detach().numpy().copy()
+
+#     # h_feat = resized.shape[0] // patch_size
+#     # w_feat = resized.shape[1] // patch_size
+
+#     # mask = v[0, -h_feat*w_feat:]
+#     mask = sort_shifted_attentions(
+#         v[0, -patch_size[0] * patch_size[1]:], shifted)
+
+#     if normalize:
+#         mask = mask / np.sum(mask)
+#     mask = mask / mask.max()
+#     mask = mask.reshape(patch_size[1], patch_size[0])
+#     mask = cv2.resize(mask, image.size)
+
+#     segments = segment_tokens_bert(tokens)
+#     attention = np.zeros(len(segments))
+#     for i, segment in enumerate(segments):
+#         attention[i] = np.sum(v[0, segment])
+#     attention = attention[1:-1]
+
+#     if normalize:
+#         attention = attention / np.sum(attention)
+
+#     attention = attention.tolist()
+
+#     return attention, mask
+
+def normalize(text):
+    text = re.sub("@\S+", "@USER", text)
+    text = re.sub("http\S+", "HTTPURL", text)
+    return text
 
 
 def overlay(image, mask, alpha=0.5):

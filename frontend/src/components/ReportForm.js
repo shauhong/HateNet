@@ -28,15 +28,15 @@ const ReportForm = ({ projects, add }) => {
                     </svg>
                 </button>
             </div>
-            <div className="overflow-y-auto max-h-80 pl-3 py-2 space-y-4">
+            <div className="overflow-y-auto max-h-80 rounded-3xl hide-scrollbar border-2 border-gray-50">
                 {
                     projects && projects.map((project, index) =>
-                        <div key={index} className="w-full flex justify-between">
+                        <div key={index} className="w-full flex justify-between odd:bg-gray-50 p-4">
                             <span className="text-lg">{project.name}</span>
                             {
                                 selected.includes(project)
-                                    ? <button onClick={() => handleRemove(project)} className="rounded-3xl px-4 py-2 bg-red-500 text-white hover:bg-red-600 font-semibold">Remove</button>
-                                    : <button onClick={() => handleSelect(project)} className="rounded-3xl px-4 py-2 bg-sky-500 text-white hover:bg-sky-600 font-semibold">Add</button>
+                                    ? <button onClick={() => handleRemove(project)} className="rounded-3xl text-sm px-4 py-2 bg-red-500 text-white hover:bg-red-600 font-semibold">Remove</button>
+                                    : <button onClick={() => handleSelect(project)} className="rounded-3xl text-sm px-4 py-2 bg-sky-500 text-white hover:bg-sky-600 font-semibold">Add</button>
                             }
                         </div>
                     )

@@ -105,19 +105,23 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
     const handleExplain = async (e) => {
         e.stopPropagation();
         if (tweet.media.length === 1) {
-            let { attention, mask } = await explainMultimodal(tweet.text, tweet.media[0].url);
+            let { attentions, mask } = await explainMultimodal(tweet.text, tweet.media[0].url);
             // attention = [...]
             // attention = [...attention.slice(1, tokens.length - 1), ...attention.slice(tokens.length)];
             // tokens = tokens.slice(1, tokens.length - 1);
-            setExplain({ attention, mask });
+            setExplain({ attention: attentions, mask });
         } else {
-            let { attention, tokens } = await explainText(tweet.text);
+            // let { attention, tokens } = await explainText(tweet.text);
+            let { attentions } = await explainText(tweet.text);
             // attention = attention.slice(1, attention.length - 1);
             // attention = attention.map(element => element * 10);
             // tokens = tokens.slice(1, tokens.length - 1);
-            console.log(attention);
-            console.log(tokens);
-            setExplain({ ...explain, attention, tokens });
+            console.log(attentions);
+            // console.log(tokens);
+
+            // setExplain({ ...explain, attention, tokens });
+            setExplain({ ...explain, attention: attentions });
+
         }
     }
 
@@ -164,23 +168,44 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                             <div>
                                 {
                                     explain.attention.length > 0
-                                        ? tweet.text.split(" ").map((element, index) => {
-                                            console.log(explain.attention[index]);
+                                        ? explain.attention.map((element, index) => {
+
+                                            // console.log(explain.attention[index]);
+                                            console.log(element)
+                                            const text = element[0];
+                                            const attention = element[1];
                                             // let weight = Math.max(Math.floor(explain.attention[index] * 10) - 1, 0);
-                                            let weight = Math.floor(explain.attention[index] * 10);
+                                            // let weight = Math.floor(explain.attention[index] * 10);
+                                            let weight = Math.floor(attention * 10);
                                             // let weight = explain.attention[index];
                                             weight = Math.min(weight, 9);
                                             // weight = weight * 100;
-                                            console.log(element);
+                                            // console.log(element);
                                             // console.log(weight);
                                             return (
                                                 <div className="inline" key={index}>
-                                                    {/* <span style={{ backgroundColor: colorMap[weight] }} className={`bg-slate-${weight} rounded-md z-30`}>{element}</span> */}
-                                                    <span style={{ backgroundColor: colorMap[weight] }} className="rounded-md z-30">{element}</span>
+                                                    <span style={{ backgroundColor: colorMap[weight] }} className="rounded-md z-30">{text}</span>
                                                     <span> </span>
                                                 </div>
                                             );
                                         })
+                                        // tweet.text.split(" ").map((element, index) => {
+                                        //     console.log(explain.attention[index]);
+                                        //     // let weight = Math.max(Math.floor(explain.attention[index] * 10) - 1, 0);
+                                        //     let weight = Math.floor(explain.attention[index] * 10);
+                                        //     // let weight = explain.attention[index];
+                                        //     weight = Math.min(weight, 9);
+                                        //     // weight = weight * 100;
+                                        //     console.log(element);
+                                        //     // console.log(weight);
+                                        //     return (
+                                        //         <div className="inline" key={index}>
+                                        //             {/* <span style={{ backgroundColor: colorMap[weight] }} className={`bg-slate-${weight} rounded-md z-30`}>{element}</span> */}
+                                        //             <span style={{ backgroundColor: colorMap[weight] }} className="rounded-md z-30">{element}</span>
+                                        //             <span> </span>
+                                        //         </div>
+                                        //     );
+                                        // })
                                         : tweet.text
                                 }
                             </div>
@@ -281,7 +306,7 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                             <div
                                 className="col-span-3 hidden md:flex items-center gap-x-1 overflow-hidden cursor-pointer group"
                                 data-tip="Explain"
-                                onClick={handleExplain}>
+                                onClick={tweet.result !== "Non-Hateful" && handleExplain}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="flex-initial min-w-[1rem] h-4 w-4 fill-gray-500 opacity-70 group-hover:fill-sky-500" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                                 </svg>

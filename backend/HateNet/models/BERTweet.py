@@ -35,7 +35,7 @@ class BERTweet(nn.Module):
         logits = self.fc2(logits)
 
         if self.output_attentions:
-            attentions = outputs[-1]
+            attentions = outputs.attentions
             return logits, attentions
 
         return logits

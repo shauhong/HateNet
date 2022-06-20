@@ -52,7 +52,7 @@ def init(app):
     vilt.to(device)
 
     bertweet_tokenizer = AutoTokenizer.from_pretrained(
-        config['BERTweet']['variant'])
+        config['BERTweet']['variant'], normalization=True)
     # visualbert_tokenizer = AutoTokenizer.from_pretrained(
     #     config['VisualBERT']['bert'])
     vilt_tokenizer = ViltProcessor.from_pretrained(config['ViLT']['variant'])

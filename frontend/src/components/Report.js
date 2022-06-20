@@ -10,7 +10,7 @@ const Report = () => {
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [tweets, setTweets] = useState([]);
-    const [asc, setAsc] = useState(true);
+    const [asc, setAsc] = useState(false);
     const [id, setId] = useState(null);
 
     useEffect(() => {

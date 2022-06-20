@@ -8,7 +8,8 @@ from PIL import Image
 import torch
 from io import BytesIO
 
-from HateNet.models.utils import get_cls_attention, get_multimodal_cls_attention, attention_rollout_multimodal, overlay, get_shifted_positions
+from HateNet.models.utils import get_cls_attention, get_multimodal_cls_attention, attention_rollout_multimodal, overlay, get_shifted_positions, attention_rollout_unimodal, normalize
+# from backend.HateNet.models.utils import attention_rollout_unimodal
 
 bp = Blueprint("inference", __name__, url_prefix="/inference")
 
@@ -27,9 +28,23 @@ def detect_text():
 def explain_detection_text():
     content = request.json
     text = content.get("text", "")
+    inputs = current_app.tokenizers["BERTweet"](text, return_tensors="pt")
+    tokens = current_app.tokenizers["BERTweet"].convert_ids_to_tokens(
+        inputs.input_ids[0])
+    decoded = current_app.tokenizers["BERTweet"].decode(
+        inputs.input_ids[0])
+    with torch.no_grad():
+        _, attentions = current_app.models['BERTweet'](inputs)
+    attentions = attention_rollout_unimodal(
+        attentions, tokens[1:-1], return_tokens=True)
+    # print(attentions)
+    # attentions = list(zip(decoded.split(" ")[1:-1], attentions))
+    return jsonify(attentions=attentions), 200
+
+    # return jsonify(attention=attention)
     attention, tokens = get_cls_attention(
         text, model=current_app.models['BERTweet'], tokenizer=current_app.tokenizers['BERTweet'], return_tokens=True)
-    return jsonify(attention=attention, tokens=tokens)
+    # return jsonify(attention=attention, tokens=tokens)
 
 
 @bp.route("/image", methods=["POST"])
@@ -77,6 +92,7 @@ def explain_detection_multimodal():
         abort(400, description="Request body is empty")
     try:
         text = str(content.get('text'))
+        text = normalize(text)
         image = content.get('image')
         response = requests.get(image, stream=True)
         if not response.ok:
@@ -84,7 +100,7 @@ def explain_detection_multimodal():
         image = Image.open(response.raw)
         # inputs = current_app.tokenizers['ViLT'](image, text, return_tensors="pt")
         inputs = current_app.models["ViLT"].processor(
-            image, text, return_tensors="pt")
+            image, text, return_tensors="pt", truncation=True, padding=True)
         with torch.no_grad():
             _, attentions, patch_index = current_app.models["ViLT"](inputs)
         # resized = inputs.pixel_values[0].permute([1, 2, 0])
@@ -92,9 +108,9 @@ def explain_detection_multimodal():
         patch_size = patch_index[1]
         tokens = current_app.models["ViLT"].processor.tokenizer.convert_ids_to_tokens(
             inputs.input_ids[0])
-        attention, mask = attention_rollout_multimodal(
+        attentions, mask = attention_rollout_multimodal(
             attentions, image, shifted, patch_size, tokens, mode="mean")
-        attention = attention.tolist()
+        # attention = attention.tolist()
         # mask = mask.tolist()
         # mask = overlay(np.array(image), mask)
         mask = (mask * 255).astype('uint8')
@@ -103,7 +119,8 @@ def explain_detection_multimodal():
         Image.fromarray(mask).save(buffer, format="JPEG")
         buffer.seek(0)
         mask = base64.b64encode(buffer.read()).decode("utf-8")
-        return jsonify(attention=attention, mask=mask), 200
+        print(mask)
+        return jsonify(attentions=attentions, mask=mask), 200
 
         # tokens = processor.tokenizer.convert_ids_to_tokens(encoding.input_ids[0])
 
