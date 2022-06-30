@@ -17,6 +17,9 @@ def register():
         abort(
             400, description=f"Username {content['username']} has been taken")
     try:
+        keys = [key for key in content if not content[key]]
+        for key in keys:
+            content.pop(key)
         password = generate_password_hash(content.pop('password'))
         user = User(**content, password=password)
         user.save()
@@ -73,8 +76,10 @@ def load_logged_in_user():
 @bp.route("/oauth/refresh")
 @login_required
 def refresh():
-    token = refresh_oauth_token(g.user.refresh_token)
-    g.user.access_token = token.get("access_token")
-    g.user.refresh_token = token.get("refresh_token")
-    g.user.save()
-    return jsonify(g.user)
+    if g.user.refresh_token:
+        token = refresh_oauth_token(g.user.refresh_token)
+        g.user.access_token = token.get("access_token")
+        g.user.refresh_token = token.get("refresh_token")
+        g.user.save()
+    return jsonify(success=True), 200
+    # return jsonify(g.user)

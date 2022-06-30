@@ -24,15 +24,18 @@ const GlobalProvider = ({ children }) => {
     const refresh = async () => {
         try {
             const response = await fetch("auth/oauth/refresh");
+            // console.log(response);
             if (!response.ok) {
                 throw new Error(`HTTP error: ${response.status}`);
             }
+            const user = await response.json();
+            // console.log(user);
         } catch (error) {
             const message = {
                 type: 'fail',
                 content: 'Failed to refresh token'
             };
-            openToast(message);
+            // openToast(message);
         }
     }
 

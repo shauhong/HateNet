@@ -90,6 +90,10 @@ def get_tweets(project):
             if scope == 'all':
                 tweets = Tweet.objects(
                     projects=project, text__contains=term).order_by(sort).allow_disk_use(enabled=True)
+                # print(start)
+                # print(end)
+                # for tweet in tweets:
+                #     print(tweet.text)
 
             if scope == 'tweet':
                 author = Author.objects(
@@ -102,6 +106,7 @@ def get_tweets(project):
                     username=g.user.twitter_username).first()
                 tweets = Tweet.objects(
                     projects=project, text__contains=term, author__ne=author).order_by(sort).allow_disk_use(enabled=True)
+
         total = math.ceil(tweets.count() / results)
         next = True if end < total else False
         tweets = [parse_json(tweet.to_dict())

@@ -566,6 +566,7 @@ def normalize(text):
 def overlay(image, mask, alpha=0.5):
     mask = np.uint8(255 * mask)
     mask = cv2.applyColorMap(mask, cv2.COLORMAP_JET)
+    mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
     mask = image + mask * alpha
     mask = mask / np.max(mask) * 255
     mask = np.uint8(mask)

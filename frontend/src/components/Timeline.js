@@ -27,18 +27,34 @@ const Timeline = () => {
     }, [loading.timeline]);
 
     useEffect(() => {
-        setPage(timeline[username] ? Math.max(Math.ceil(timeline[username].length / 25), 1) : 1);
+        setPage(timeline[username] ? Math.max(Math.ceil(timeline[username].tweets.length / 25), 1) : 1);
         setLast(false);
         restore();
     }, [username]);
 
     useEffect(() => {
-        fetchPage(page);
+        // if (page !== undefined) {
+        //     console.log("fetchPage");
+        //     console.log(`page: ${page}`);
+        //     fetchPage(page);
+        // }
+        // console.log("fetchPage");
+        // console.log(`page: ${page}`);
+
+        if (!last) {
+            fetchPage(page);
+        }
+
+        // if(timeline.hasOwnProperty(username) && timeline[username].next) {
+        //     fetchPage(page);
+        // }
+
     }, [page, last]);
 
     const fetchPage = async (page) => {
         const next = await fetchTimeline(project.name, username, page, 25);
         if (next !== undefined) {
+            console.log("set next");
             setLast(!next);
         }
     }
@@ -64,8 +80,8 @@ const Timeline = () => {
                 </svg>
             </button>
             {
-                project && timeline[username] && timeline[username].map((tweet, index) => {
-                    if (index === timeline[username].length - 1) {
+                project && timeline[username] && timeline[username].tweets.map((tweet, index) => {
+                    if (index === timeline[username].tweets.length - 1) {
                         return (
                             <div ref={targetRef} key={index}>
                                 <Post tweet={tweet} clickable={true} hoverable={true} store={store} />
@@ -73,12 +89,12 @@ const Timeline = () => {
                         );
                     }
                     return (
-                        <Post tweet={tweet} clickable={true} hoverable={true} store={store} key={index} />
+                        <Post tweet={tweet} clickable={true} hoverable={true} store={store} key={index} toggable={true} />
                     );
                 })
             }
             {
-                loading.timeline && [...Array(3)].map((element, index) => <PostSkeleton loading={true} even={index % 2 === 0} />)
+                loading.timeline && [...Array(3)].map((element, index) => <PostSkeleton loading={true} even={index % 2 === 0} key={index} />)
             }
         </div>
     );

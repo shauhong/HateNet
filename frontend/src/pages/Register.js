@@ -15,6 +15,8 @@ const Register = () => {
     });
 
     const handleFormChange = (e, field) => {
+        console.log(field);
+        console.log(e.target.value);
         form[field] = e.target.value;
         setForm({ ...form });
     }

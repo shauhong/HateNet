@@ -41,7 +41,7 @@ class ViLT(nn.Module):
     def inference(self, inputs, device="cpu"):
         inputs = inputs.to(device)
         if self.output_attentions:
-            logits, _ = self.forward(inputs)
+            logits, _, _ = self.forward(inputs)
         else:
             logits = self.forward(inputs)
         labels = torch.argmax(logits, dim=-1)

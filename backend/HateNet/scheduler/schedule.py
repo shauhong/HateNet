@@ -100,9 +100,9 @@ def get_jobs_id(project):
 @params_required
 def init_schedule(scheduler, params, headers):
     reset(scheduler)
-    # schedule_personal_projects(scheduler, params, headers)
+    schedule_personal_projects(scheduler, params, headers)
     # schedule_monitor_projects(scheduler, params, headers)
-    # schedule_aggregate_projects(scheduler)
+    schedule_aggregate_projects(scheduler)
     # schedule_historical_projects(scheduler, params, headers)
     # schedule_volume_projects(scheduler, params, headers)
     # schedule_filtered_projects(scheduler, params, headers)

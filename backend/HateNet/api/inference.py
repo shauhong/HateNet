@@ -36,7 +36,7 @@ def explain_detection_text():
     with torch.no_grad():
         _, attentions = current_app.models['BERTweet'](inputs)
     attentions = attention_rollout_unimodal(
-        attentions, tokens[1:-1], return_tokens=True)
+        attentions, tokens, return_tokens=True)
     # print(attentions)
     # attentions = list(zip(decoded.split(" ")[1:-1], attentions))
     return jsonify(attentions=attentions), 200
@@ -71,15 +71,20 @@ def detect_multimodal():
         abort(400, description="Request body is empty")
     try:
         text = str(content.get('text'))
+        text = normalize(text)
         image = content.get('image')
         response = requests.get(image, stream=True)
         if not response.ok:
             raise Exception("Invalid image url")
-        image = Image.open(response.raw)
-        inputs = current_app.tokenizers['ViLT'](
-            image, text, return_tensors="pt")
+        image = Image.open(response.raw).convert("RGB")
+        inputs = current_app.models['ViLT'].processor(
+            image, text, return_tensors="pt", truncation=True)
+        print(inputs)
+        # inputs = current_app.tokenizers['ViLT'](
+        #     image, text, return_tensors="pt")
         with torch.no_grad():
             label = current_app.models["ViLT"].inference(inputs)[0]
+            print(label)
         return jsonify(label=label), 200
     except Exception as e:
         abort(400, description=str(e))
@@ -97,7 +102,7 @@ def explain_detection_multimodal():
         response = requests.get(image, stream=True)
         if not response.ok:
             raise Exception("Invalid image url")
-        image = Image.open(response.raw)
+        image = Image.open(response.raw).convert("RGB")
         # inputs = current_app.tokenizers['ViLT'](image, text, return_tensors="pt")
         inputs = current_app.models["ViLT"].processor(
             image, text, return_tensors="pt", truncation=True, padding=True)
@@ -112,14 +117,15 @@ def explain_detection_multimodal():
             attentions, image, shifted, patch_size, tokens, mode="mean")
         # attention = attention.tolist()
         # mask = mask.tolist()
-        # mask = overlay(np.array(image), mask)
-        mask = (mask * 255).astype('uint8')
-        mask = cv2.applyColorMap(mask, cv2.COLORMAP_JET)
+        mask = overlay(np.array(image), mask)
+        # mask = (mask * 255).astype('uint8')
+        # mask = cv2.applyColorMap(mask, cv2.COLORMAP_JET)
+        # mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
         buffer = BytesIO()
         Image.fromarray(mask).save(buffer, format="JPEG")
         buffer.seek(0)
         mask = base64.b64encode(buffer.read()).decode("utf-8")
-        print(mask)
+        # print(mask)
         return jsonify(attentions=attentions, mask=mask), 200
 
         # tokens = processor.tokenizer.convert_ids_to_tokens(encoding.input_ids[0])

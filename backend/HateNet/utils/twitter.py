@@ -311,6 +311,7 @@ def save_tweet(tweet, project):
             author.save()
 
         data['author'] = author
+        data['username'] = author.username
         tweet = Tweet(**data)
         tweet.save()
         return tweet

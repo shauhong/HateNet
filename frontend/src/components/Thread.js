@@ -11,7 +11,7 @@ const Thread = () => {
     const { loading, replies, fetchReplies, timeline } = useData();
     const { username, id } = useParams();
     const { project } = useProject();
-    const tweet = timeline[username].find(tweet => tweet.tweet_id === id);
+    const tweet = timeline[username].tweets.find(tweet => tweet.tweet_id === id);
 
     const targetRef = useCallback(node => {
         if (loading.replies) return;
@@ -31,7 +31,9 @@ const Thread = () => {
     }, [username, id]);
 
     useEffect(() => {
-        fetchPage(page);
+        if (!last) {
+            fetchPage(page);
+        }
     }, [page]);
 
     const fetchPage = async (page) => {

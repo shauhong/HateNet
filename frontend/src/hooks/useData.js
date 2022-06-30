@@ -162,24 +162,38 @@ const useData = () => {
     }
 
     const fetchTimeline = async (project, username, page, results) => {
-        if (!timeline.hasOwnProperty(username) || timeline[username].length < page * results) {
+        // if (!timeline.hasOwnProperty(username) || timeline[username].length < page * results) {
+        if (!timeline.hasOwnProperty(username) || timeline[username].next) {
             try {
                 setLoading({ ...loading, timeline: true });
+                console.log(`page: ${page}`);
+                console.log(`results: ${results}`);
                 const response = await fetch(`/data/${encodeURIComponent(project)}/${encodeURIComponent(username)}/timeline?` + new URLSearchParams({ page, results }));
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const { tweets, next } = await response.json();
+                console.log(`next: ${next}`);
                 setLoading({ ...loading, timeline: false });
                 const parsed = tweets.map(tweet => parseTweet(tweet));
-                if (username in timeline) {
-                    timeline[username] = timeline[username].concat(parsed);
-                } else {
-                    timeline[username] = parsed;
+                if (!timeline.hasOwnProperty(username)) {
+                    timeline[username] = {
+                        tweets: [],
+                        next: true
+                    }
                 }
+                timeline[username].tweets = timeline[username].tweets.concat(parsed);
+                timeline[username].next = next;
+                // if (username in timeline) {
+                //     timeline[username] = timeline[username].concat(parsed);
+                // } else {
+                //     timeline[username] = parsed;
+                // }
+                console.log(timeline)
                 setTimeline({ ...timeline });
                 return next;
             } catch (error) {
+                console.log(error);
                 const message = {
                     type: 'fail',
                     content: 'Failed to fetch timeline'

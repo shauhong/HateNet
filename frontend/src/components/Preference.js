@@ -17,6 +17,7 @@ const Preference = () => {
         media: 'has:images',
     });
     const { projects, fetchProjects, createProject, updateProject } = useProject();
+    // console.log(`${process.env.REACT_APP_CLIENT_ID}`)
 
 
     useEffect(() => {

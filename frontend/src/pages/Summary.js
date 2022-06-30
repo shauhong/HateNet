@@ -65,7 +65,7 @@ const Summary = () => {
             fetchAggregate(project.name, 'all');
             fetchAggregate(project.name, 'tweet');
             fetchAggregate(project.name, 'reply');
-            fetchTimeline(project.name, project.user.twitter_username);
+            // fetchTimeline(project.name, project.user.twitter_username);
             navigate(`${project.user.twitter_username}`);
             const username = project.user.twitter_username;
             if (username) {

@@ -5,7 +5,6 @@ const Leaderboard = ({ users, monitor, updateMonitor, loading }) => {
     const imgRef = useRef(null);
 
     const handleError = (e) => {
-        // console.log("handle error");
         // imgRef.current.src = logo;
         e.target.src = logo
     }

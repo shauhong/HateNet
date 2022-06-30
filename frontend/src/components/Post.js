@@ -40,7 +40,7 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
         if (canvas) {
             let image = new Image();
             image.src = tweet.media[0].url;
-            console.log(tweet.media[0].url)
+            // console.log(tweet.media[0].url)
             const context = canvas.getContext("2d");
             image.onload = () => {
                 canvas.height = image.height;
@@ -53,16 +53,26 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
     useEffect(() => {
         const canvas = canvasRef.current;
         if (canvas && explain.mask) {
+            let mask = new Image();
             let image = new Image();
-            image.src = `data:image/jpeg;base64,${explain.mask}`;
+            mask.src = `data:image/jpeg;base64,${explain.mask}`;
+            image.src = tweet.media[0].url;
             const context = canvas.getContext("2d");
             context.globalAlpha = 0.2;
             // console.log(image);
             // context.drawImage(image, 0, 0);
-            image.onload = () => {
-                console.log(image)
-                context.drawImage(image, 0, 0)
+            // image.onload = () => {
+            //     context.globalAlpha = 1.0;
+            //     context.drawImage(image, 0, 0);
+            // }
+            mask.onload = () => {
+                // console.log(image)
+                context.globalAlpha = 0.2;
+                canvas.height = mask.height;
+                canvas.width = mask.width;
+                context.drawImage(mask, 0, 0);
             };
+
         }
     }, [explain.mask])
 
@@ -104,7 +114,7 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
 
     const handleExplain = async (e) => {
         e.stopPropagation();
-        if (tweet.media.length === 1) {
+        if (tweet.media.length >= 1) {
             let { attentions, mask } = await explainMultimodal(tweet.text, tweet.media[0].url);
             // attention = [...]
             // attention = [...attention.slice(1, tokens.length - 1), ...attention.slice(tokens.length)];
@@ -116,7 +126,7 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
             // attention = attention.slice(1, attention.length - 1);
             // attention = attention.map(element => element * 10);
             // tokens = tokens.slice(1, tokens.length - 1);
-            console.log(attentions);
+            // console.log(attentions);
             // console.log(tokens);
 
             // setExplain({ ...explain, attention, tokens });
@@ -171,7 +181,7 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                                         ? explain.attention.map((element, index) => {
 
                                             // console.log(explain.attention[index]);
-                                            console.log(element)
+                                            // console.log(element)
                                             const text = element[0];
                                             const attention = element[1];
                                             // let weight = Math.max(Math.floor(explain.attention[index] * 10) - 1, 0);
@@ -210,47 +220,41 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                                 }
                             </div>
                             {
-                                tweet.media.length === 1
-                                    ? <div className="rounded-3xl max-h-96 overflow-y-auto">
+                                explain.mask
+                                    ?
+                                    <div className="rounded-3xl max-h-96 overflow-y-auto">
                                         <canvas ref={canvasRef} className="rounded-3xl object-cover w-full h-full" />
                                     </div>
-                                    : tweet.media.length === 2
-                                        ? <div className="rounded-3xl grid grid-cols-2 max-h-96 overflow-y-auto">
+                                    :
+                                    tweet.media.length === 1
+                                        ?
+                                        <div className="rounded-3xl max-h-96 overflow-y-auto">
                                             <img
                                                 src={tweet.media[0].url}
                                                 alt=""
                                                 className="col-span-1 rounded-l-3xl object-cover w-full h-full"
                                             />
-                                            <img
-                                                src={tweet.media[1].url}
-                                                alt=""
-                                                className="col-span-1 rounded-r-3xl object-cover w-full h-full"
-                                            />
+                                            {/* <canvas ref={canvasRef} className="rounded-3xl object-cover w-full h-full" /> */}
                                         </div>
-                                        : tweet.media.length === 3
-                                            ? <div className="rounded-3xl grid grid-rows-2 grid-cols-3 max-h-96 overflow-y-auto">
+                                        : tweet.media.length === 2
+                                            ? <div className="rounded-3xl grid grid-cols-2 max-h-96 overflow-y-auto">
                                                 <img
                                                     src={tweet.media[0].url}
                                                     alt=""
-                                                    className="col-span-2 row-span-2 rounded-l-3xl object-cover w-full h-full"
+                                                    className="col-span-1 rounded-l-3xl object-cover w-full h-full"
                                                 />
                                                 <img
                                                     src={tweet.media[1].url}
                                                     alt=""
-                                                    className="col-span-1 rounded-tr-3xl object-cover w-full h-full"
-                                                />
-                                                <img
-                                                    src={tweet.media[2].url}
-                                                    alt=""
-                                                    className="col-span-1 rounded-br-3xl object-cover w-full h-full"
+                                                    className="col-span-1 rounded-r-3xl object-cover w-full h-full"
                                                 />
                                             </div>
-                                            : tweet.media.length === 4
-                                                ? <div className="rounded-3xl grid grid-rows-2 grid-cols-2 max-h-96 overflow-y-auto">
+                                            : tweet.media.length === 3
+                                                ? <div className="rounded-3xl grid grid-rows-2 grid-cols-3 max-h-96 overflow-y-auto">
                                                     <img
                                                         src={tweet.media[0].url}
                                                         alt=""
-                                                        className="col-span-1 rounded-tl-3xl object-cover w-full h-full"
+                                                        className="col-span-2 row-span-2 rounded-l-3xl object-cover w-full h-full"
                                                     />
                                                     <img
                                                         src={tweet.media[1].url}
@@ -260,15 +264,33 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                                                     <img
                                                         src={tweet.media[2].url}
                                                         alt=""
-                                                        className="col-span-1 rounded-bl-3xl object-cover w-full h-full"
-                                                    />
-                                                    <img
-                                                        src={tweet.media[3].url}
-                                                        alt=""
                                                         className="col-span-1 rounded-br-3xl object-cover w-full h-full"
                                                     />
                                                 </div>
-                                                : <></>
+                                                : tweet.media.length === 4
+                                                    ? <div className="rounded-3xl grid grid-rows-2 grid-cols-2 max-h-96 overflow-y-auto">
+                                                        <img
+                                                            src={tweet.media[0].url}
+                                                            alt=""
+                                                            className="col-span-1 rounded-tl-3xl object-cover w-full h-full"
+                                                        />
+                                                        <img
+                                                            src={tweet.media[1].url}
+                                                            alt=""
+                                                            className="col-span-1 rounded-tr-3xl object-cover w-full h-full"
+                                                        />
+                                                        <img
+                                                            src={tweet.media[2].url}
+                                                            alt=""
+                                                            className="col-span-1 rounded-bl-3xl object-cover w-full h-full"
+                                                        />
+                                                        <img
+                                                            src={tweet.media[3].url}
+                                                            alt=""
+                                                            className="col-span-1 rounded-br-3xl object-cover w-full h-full"
+                                                        />
+                                                    </div>
+                                                    : <></>
                             }
                         </div>
                         <div className={` gap-x-2 justify-between items-center grid ${reply ? 'grid-cols-9' : 'grid-cols-11'}`}>
@@ -295,7 +317,9 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
 
                             {
                                 !reply &&
-                                <div className="col-span-2 hidden md:flex items-center gap-x-1 group">
+                                <div className="col-span-2 hidden md:flex items-center gap-x-1 group"
+                                    onClick={handleToggle}
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 fill-gray-500 opacity-70 ${toggable ? "cursor-pointer hover:fill-sky-500 hover:opacity-100" : "cursor-default"}`} viewBox="0 0 512 512" onClick={handleToggle}>
                                         <path d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256s256-114.6 256-256S397.4 0 256 0zM256 128c17.67 0 32 14.33 32 32c0 17.67-14.33 32-32 32S224 177.7 224 160C224 142.3 238.3 128 256 128zM296 384h-80C202.8 384 192 373.3 192 360s10.75-24 24-24h16v-64H224c-13.25 0-24-10.75-24-24S210.8 224 224 224h32c13.25 0 24 10.75 24 24v88h16c13.25 0 24 10.75 24 24S309.3 384 296 384z" />
                                     </svg>
@@ -306,7 +330,9 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                             <div
                                 className="col-span-3 hidden md:flex items-center gap-x-1 overflow-hidden cursor-pointer group"
                                 data-tip="Explain"
-                                onClick={tweet.result !== "Non-Hateful" && handleExplain}>
+                                onClick={tweet.result !== "Non-Hateful" && handleExplain}
+                            // onClick={handleExplain}
+                            >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="flex-initial min-w-[1rem] h-4 w-4 fill-gray-500 opacity-70 group-hover:fill-sky-500" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                                 </svg>
@@ -322,13 +348,14 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                 </div>
             </div >
 
-            <div className={`${toggable ? toggle ? "block" : "hidden" : "hidden"} bg-white rounded-3xl border h-96 px-6 py-4 mx-auto max-w-xs md:max-w-lg flex flex-col`}>
+            <div className={`${toggable ? toggle ? "block" : "hidden" : "hidden"} bg-white rounded-3xl border h-80 px-6 py-4 mx-auto max-w-xs md:max-w-lg w-full flex flex-col`}>
                 <div className="px-2 mb-2">
                     <span className="text-lg font-semibold">Influence</span>
                 </div>
                 <div className="h-full">
                     <Pie
                         data={{
+                            // labels: Object.keys(tweet.influence).filter((element, index) => tweet.influence[element] > 0),
                             labels: Object.keys(tweet.influence),
                             datasets: [
                                 {
