@@ -234,7 +234,7 @@ const useProject = () => {
         } catch (error) {
             const message = {
                 type: 'fail',
-                content: 'Failed to start streaming',
+                content: 'Failed to update streaming',
             }
             openToast(message);
         }

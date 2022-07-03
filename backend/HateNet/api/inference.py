@@ -78,10 +78,8 @@ def detect_multimodal():
             raise Exception("Invalid image url")
         image = Image.open(response.raw).convert("RGB")
         inputs = current_app.models['ViLT'].processor(
-            image, text, return_tensors="pt", truncation=True)
+            image, text, return_tensors="pt", padding=True, truncation=True)
         print(inputs)
-        # inputs = current_app.tokenizers['ViLT'](
-        #     image, text, return_tensors="pt")
         with torch.no_grad():
             label = current_app.models["ViLT"].inference(inputs)[0]
             print(label)

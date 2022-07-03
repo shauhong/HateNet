@@ -42,7 +42,7 @@ class BERTweet(nn.Module):
 
     def collate_fn(self, batch):
         inputs = self.tokenizer(
-            batch, padding=True, truncation=True, max_length=1000, return_tensors="pt")
+            batch, padding=True, truncation=True, return_tensors="pt")
         return inputs
 
     def inference(self, batch, device="cpu"):

@@ -348,11 +348,11 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                 </div>
             </div >
 
-            <div className={`${toggable ? toggle ? "block" : "hidden" : "hidden"} bg-white rounded-3xl border h-80 px-6 py-4 mx-auto max-w-xs md:max-w-lg w-full flex flex-col`}>
+            <div className={`${toggable ? toggle ? "block" : "hidden" : "hidden"} bg-white rounded-3xl border h-80 px-6 py-4 mx-auto max-w-xs md:max-w-xl w-full flex flex-col`}>
                 <div className="px-2 mb-2">
                     <span className="text-lg font-semibold">Influence</span>
                 </div>
-                <div className="h-full">
+                <div className="">
                     <Pie
                         data={{
                             // labels: Object.keys(tweet.influence).filter((element, index) => tweet.influence[element] > 0),

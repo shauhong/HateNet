@@ -7,4 +7,4 @@ def init(app):
         'apscheduler.timezone': "Asia/Kuala_Lumpur"
     })
     app.scheduler.start()
-    init_schedule(app.scheduler)
+    init_schedule(app.scheduler, app)

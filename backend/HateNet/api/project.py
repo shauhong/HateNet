@@ -7,14 +7,16 @@ from HateNet.utils.date import parse_datestring
 from HateNet.utils.file import parse_json
 from HateNet.utils.twitter import add_filtered_stream, add_volume_stream, construct_query, get_oauth_token, lookup_authorized_user, retrieve_historical_tweets
 from HateNet.utils.wrappers import bearer_token_required, login_required, params_required, project_existed
+from HateNet.utils.twitter import save_user
 
 
 bp = Blueprint("project", __name__, url_prefix="/project")
 
 
 @bp.route('/new', methods=['POST'])
+@bearer_token_required
 @login_required
-def create_project():
+def create_project(headers):
     content = request.json
     if not content:
         abort(400, description="Request body is empty")
@@ -30,14 +32,18 @@ def create_project():
             state = content.pop('state')
             code = content.pop('code')
             if not state and code:
+                print("Unauthorized")
                 abort(400, description="Unauthorized Twitter user")
             token = get_oauth_token(code)
             g.user.access_token = token['access_token']
             g.user.refresh_token = token['refresh_token']
             user = lookup_authorized_user(g.user.access_token)
+            print(user)
+            # save_user(user.get("id"), headers)
             g.user.twitter_username = user.get("username")
             g.user.twitter_id = user.get("id")
             g.user.save()
+            save_user(g.user.twitter_id, headers)
         try:
             project = Project(**content, user=g.user,
                               created_at=datetime.now())
@@ -153,6 +159,7 @@ def delete_project(id):
 def start_stream(project, headers, params):
     try:
         if not project.streaming:
+            print(project)
             id = f"{project.user.username}-{project.name}"
             existing_ids = [job.id for job in current_app.scheduler.get_jobs()]
             if id in existing_ids:
@@ -180,9 +187,13 @@ def start_stream(project, headers, params):
 @project_existed
 def stop(project):
     try:
+        # print(project)
+        # print(project.user.username)
+        # id = f"{project.user.username}-{project.name}"
         remove_from_schedule(current_app.scheduler, project)
         project.reload()
         return jsonify(project), 200
     except Exception as e:
+        print(e)
         abort(
             500, description="Failed to stop stream")

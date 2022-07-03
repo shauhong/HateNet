@@ -45,7 +45,11 @@ def project_existed(view):
         project = Project.objects(name=project, user=g.user).first()
         if project is None:
             abort(400, description="Invalid Project")
-        return view(project, *args, **kwargs)
+        kwargs.update({
+            'project': project
+        })
+        return view(*args, **kwargs)
+        # return view(project, *args, **kwargs)
     return wrapped_view
 
 

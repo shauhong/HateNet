@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 from HateNet.database.schema import Project
-from HateNet.models.inference import detect_text, detect_multimodal
+from HateNet.models.inference import detect_text, detect_multimodal, detect_projects
 from HateNet.utils.aggregate import aggregate_project, aggregate_projects
 from HateNet.utils.file import load_yaml
 from HateNet.utils.twitter import add_filtered_stream, add_volume_stream, delete_all_rules, delete_rules, get_filtered_stream, get_rules, get_volume_stream, remove_filtered_stream, remove_volume_stream, retrieve_filtered_stream_tweets, retrieve_historical_tweets, retrieve_monitor_projects, retrieve_monitor_tweets, retrieve_personal_projects, retrieve_personal_tweets, retrieve_volume_stream_tweets, set_rules
@@ -98,14 +98,17 @@ def get_jobs_id(project):
 
 @bearer_token_required
 @params_required
-def init_schedule(scheduler, params, headers):
+def init_schedule(scheduler, app, params, headers):
     reset(scheduler)
-    schedule_personal_projects(scheduler, params, headers)
+
+    # schedule_personal_projects(scheduler, params, headers)
     # schedule_monitor_projects(scheduler, params, headers)
-    schedule_aggregate_projects(scheduler)
     # schedule_historical_projects(scheduler, params, headers)
     # schedule_volume_projects(scheduler, params, headers)
     # schedule_filtered_projects(scheduler, params, headers)
+    # with app.app_context():
+    #     schedule_detect_projects(scheduler)
+    # schedule_aggregate_projects(scheduler)
 
 
 def reset(scheduler):
@@ -283,6 +286,21 @@ def schedule_aggregate_project(scheduler, project):
         scheduler.remove_job(id)
     scheduler.add_job(aggregate_project, 'interval', days=1,
                       next_run_time=datetime.now(),  misfire_grace_time=300, args=[project], id=id)
+
+
+def schedule_detect_projects(scheduler):
+    print("Schedule Detect Projects")
+    id = 'detect'
+    ids = [job.id for job in scheduler.get_jobs()]
+    if id in ids:
+        scheduler.remove_job(id)
+    scheduler.add_job(detect_projects, 'interval', days=1,
+                      next_run_time=datetime.now(), misfire_grace_time=300, id=id, args=[current_app.models])
+    #
+
+# def schedule_detect_text(scheduler, project, id, minutes=15):
+#     scheduler.add_job(detect_text, 'interval', minutes=minutes, args=[
+#                       project, current_app.models['BERTweet'], current_app.device], id=id)
 
 
 def update_project(project, **kwargs):

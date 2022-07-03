@@ -26,7 +26,7 @@ const Thread = () => {
     }, [loading.replies]);
 
     useEffect(() => {
-        setPage(replies[id] ? Math.max(Math.ceil(replies[id].length / 25), 1) : 1);
+        setPage(replies[id] ? Math.max(Math.ceil(replies[id].tweets.length / 25), 1) : 1);
         setLast(false);
     }, [username, id]);
 
@@ -54,14 +54,14 @@ const Thread = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z" />
                 </svg>
             </button>
-            <Post tweet={tweet} />
+            <Post tweet={tweet} toggable={true} />
             <hr />
             {
-                replies[id] && replies[id].map((reply, index) => {
-                    if (index === replies[id].length - 1) {
+                replies[id] && replies[id].tweets.map((reply, index) => {
+                    if (index === replies[id].tweets.length - 1) {
                         return (
                             <div ref={targetRef} key={reply._id.$oid}>
-                                <Post tweet={reply} hoverable={false} toggable={true} />
+                                <Post tweet={reply} hoverable={false} toggable={false} reply={true} />
                             </div>
                         );
                     }

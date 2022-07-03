@@ -206,7 +206,8 @@ const useData = () => {
     }
 
     const fetchReplies = async (project, id, page, results) => {
-        if (!replies.hasOwnProperty(id) || replies[id].length < page * results) {
+        // if (!replies.hasOwnProperty(id) || replies[id].length < page * results) {
+        if (!replies.hasOwnProperty(id) || replies[id].next) {
             try {
                 setLoading({ ...loading, replies: true });
                 const response = await fetch(`/data/${encodeURIComponent(project)}/replies/${encodeURIComponent(id)}?` + new URLSearchParams({ page, results }));
@@ -216,11 +217,23 @@ const useData = () => {
                 const { tweets, next } = await response.json();
                 setLoading({ ...loading, replies: false });
                 const parsed = tweets.map(tweet => parseTweet(tweet));
-                if (id in replies) {
-                    replies[id] = replies[id].concat(parsed);
-                } else {
-                    replies[id] = parsed;
+
+                if (!replies.hasOwnProperty(id)) {
+                    replies[id] = {
+                        tweets: [],
+                        next: true
+                    }
                 }
+
+                replies[id].tweets = replies[id].tweets.concat(parsed);
+                replies[id].next = next;
+
+
+                // if (id in replies) {
+                //     replies[id] = replies[id].concat(parsed);
+                // } else {
+                //     replies[id] = parsed;
+                // }
                 setReplies({ ...replies });
                 return next;
             } catch (error) {
