@@ -231,7 +231,7 @@ const Summary = () => {
             </div>
 
             <div className="grid grid-cols-12 gap-6 mb-6">
-                <div className="col-span-12 lg:col-span-7 bg-white rounded-3xl shadow-md flex flex-col px-6 py-4 justify-between items-center min-h-[24rem]">
+                <div className="col-span-12 lg:col-span-7 bg-white rounded-3xl shadow-md flex flex-col px-6 py-4 justify-between items-center min-h-[24rem] h-96">
                     <div className="w-full flex justify-between px-2 mb-2">
                         <span className="text-lg font-semibold">Trend</span>
                         <Filter

@@ -58,6 +58,7 @@ const useData = () => {
                     aggregate[project] = {};
                 }
                 aggregate[project][kind] = data;
+                console.log(aggregate);
                 setAggregate({ ...aggregate });
             } catch (error) {
                 const message = {
@@ -306,7 +307,8 @@ const useData = () => {
     }
 
     const fetchBlocks = async () => {
-        if (blocks.length === 0) {
+        // if (blocks.length === 0) {
+        if (!blocks.retrieved) {
             try {
                 const response = await fetch("/block/");
                 if (!response.ok) {
@@ -314,13 +316,13 @@ const useData = () => {
                 }
                 let blocks = await response.json()
                 blocks = blocks.map(block => block.username);
-                setBlocks(blocks);
+                setBlocks({ users: blocks, retrieved: true });
             } catch (error) {
                 const message = {
                     type: "fail",
                     content: "Failed to retrieve blocking list"
                 };
-                openToast(message);
+                // openToast(message);
             }
         }
     }
@@ -342,7 +344,11 @@ const useData = () => {
             if (!response.ok) {
                 throw new Error(`HTTP status: ${response.status}`);
             }
-            setBlocks((blocks) => [...blocks, username]);
+            // setBlocks((blocks) => [...blocks, username]);
+            // setBlocks((blocks)=>)
+            blocks.users = [...blocks.users, username];
+            setBlocks({ ...blocks });
+            // setBlocks({users: [...blocks.users, username]})
             const message = {
                 type: "success",
                 content: `Successfully blocked ${username}`
@@ -374,7 +380,9 @@ const useData = () => {
             if (!response.ok) {
                 throw new Error(`HTTP status: ${response.status}`);
             }
-            setBlocks((blocks) => [...blocks.filter(block => block !== username)]);
+            blocks.users = blocks.users.filter(block => block !== username);
+            setBlocks({ ...blocks });
+            // setBlocks((blocks) => [...blocks.filter(block => block !== username)]);
             const message = {
                 type: "success",
                 content: `Successfully unblocked ${username}`

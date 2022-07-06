@@ -54,7 +54,7 @@ const Overview = () => {
         project = projects.find(element => element.name === project);
         setProject(project);
         fetchProgress(project.name);
-        fetchAggregate(project.name);
+        fetchAggregate(project.name, "all");
     };
 
     const handleFilterChart = (chart, type, value) => {

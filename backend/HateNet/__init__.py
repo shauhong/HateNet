@@ -1,6 +1,4 @@
 from http.client import HTTPException
-from pydoc import describe
-from xmlrpc.client import boolean
 from flask import Flask, jsonify
 from flask_cors import CORS
 import os
@@ -15,7 +13,7 @@ def create_app():
     from . import api, database, models, scheduler
     api.init(app)
     database.init(app)
-    # models.init(app)
+    models.init(app)
     scheduler.init(app)
 
     return app

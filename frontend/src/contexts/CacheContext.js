@@ -8,7 +8,10 @@ const CacheProvider = ({ children }) => {
     const [tweets, setTweets] = useState({});
     const [timeline, setTimeline] = useState({});
     const [replies, setReplies] = useState({});
-    const [blocks, setBlocks] = useState([]);
+    const [blocks, setBlocks] = useState({
+        users: [],
+        retrieved: false,
+    });
     const [next, setNext] = useState({
         timeline: {},
         tweets: {},

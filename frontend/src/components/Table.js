@@ -222,7 +222,7 @@ const Table = ({ project, user, scope = "all" }) => {
                                 )
                                 : tweets.length > 0
                                     ? tweets.map(tweet =>
-                                        <tr key={tweet._id.$oid} className="odd:bg-white even:bg-gray-100 hover:bg-gray-200 cursor-pointer" onClick={() => openModal(<Post tweet={tweet} modal={true} toggable={false} />)}>
+                                        <tr key={tweet._id.$oid} className="odd:bg-white even:bg-gray-100 hover:bg-gray-200 cursor-pointer" onClick={() => openModal(<Post tweet={tweet} modal={true} toggable={false} reply={true} />)}>
                                             <td className="px-6 py-3 max-w-md overflow-hidden whitespace-nowrap text-ellipsis">
                                                 {tweet.text}
                                             </td>
@@ -279,13 +279,13 @@ const Table = ({ project, user, scope = "all" }) => {
                                                     </td>
                                                     : <td className="py-2 text-center space-x-2">
                                                         <button
-                                                            onClick={blocks.includes(tweet.author.username) ? (e) => { e.stopPropagation(); unblock(tweet.author.username) } : (e) => { e.stopPropagation(); block(tweet.author.username) }}
-                                                            data-tip={blocks.includes(tweet.author.username) ? "Unblock" : "Block"}
+                                                            onClick={blocks.users && blocks.users.includes(tweet.author.username) ? (e) => { e.stopPropagation(); unblock(tweet.author.username) } : (e) => { e.stopPropagation(); block(tweet.author.username) }}
+                                                            data-tip={blocks.users && blocks.users.includes(tweet.author.username) ? "Unblock" : "Block"}
                                                             disabled={
                                                                 tweet.author.username === project.user.twitter_username ? true : false
                                                             }
                                                         >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${tweet.author.username === project.user.twitter_username ? "stroke-gray-500 cursor-not-allowed" : blocks.includes(tweet.author.username) ? "stroke-sky-500" : "hover:stroke-sky-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${tweet.author.username === project.user.twitter_username ? "stroke-gray-500 cursor-not-allowed" : blocks.users && blocks.users.includes(tweet.author.username) ? "stroke-sky-500" : "hover:stroke-sky-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                                             </svg>
                                                         </button>
