@@ -1,9 +1,12 @@
 
 import { ComposableMap, ZoomableGroup, Geographies, Geography } from 'react-simple-maps';
 import { scaleQuantile } from 'd3-scale';
+import { features } from '../utils/features.json';
 
 const Map = ({ setToolTipContent, data, labels }) => {
-    const url = "https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json";
+    console.log(data);
+    // const url = "https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json";
+    // const url = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
     const colorScale = scaleQuantile().domain(data).range([
         '#f0f9ff',
         '#e0f2fe',
@@ -20,19 +23,21 @@ const Map = ({ setToolTipContent, data, labels }) => {
     return (
         <ComposableMap data-tip="" className="rounded-3xl border border-slate-200 my-auto">
             <ZoomableGroup zoom={1} minZoom={1} maxZoom={10} center={[0, 0]}>
-                <Geographies geography={url}>
+                <Geographies geography={"/features.json"}>
                     {
                         ({ geographies }) =>
                             geographies.map(geography => {
-                                const current = labels.find(element => element === geography.properties.ISO_A2);
+                                console.log(geography);
+                                console.log(labels);
+                                const current = labels.find(element => element === geography.id);
                                 return (
                                     <Geography
                                         key={geography.rsmKey}
                                         geography={geography}
                                         onMouseEnter={() => {
-                                            const { NAME } = geography.properties;
+                                            const { name } = geography.properties;
                                             const count = current ? data[labels.indexOf(current)] : 0
-                                            setToolTipContent(`${NAME}: ${count}`);
+                                            setToolTipContent(`${name}: ${count}`);
                                         }}
                                         onMouseLeave={() => {
                                             setToolTipContent("");

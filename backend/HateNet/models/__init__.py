@@ -5,14 +5,7 @@ from transformers import AutoTokenizer, ViltProcessor
 
 from HateNet.utils.file import load_yaml
 
-label2class = {
-    0: "Non-Hateful",
-    1: "Racist",
-    2: "Sexist",
-    3: "Homophobe",
-    4: "Religion",
-    5: "Other"
-}
+3
 
 
 def init(app):
