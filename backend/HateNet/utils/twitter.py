@@ -3,7 +3,6 @@ import re
 from time import sleep
 import requests
 import json
-from flask import abort
 from datetime import datetime
 
 from HateNet.database.schema import Media, Place, Project, Tweet, TweetMetrics, User, Author, Geo
@@ -375,21 +374,12 @@ def lookup_authorized_user(access_token):
     headers = {
         'Authorization': f"Bearer {access_token}"
     }
-    # params = {
-    #     "user.fields": "created_at,description,location,profile_image_url,public_metrics,protected,verified"
-    # }
     try:
         response = requests.get(url, headers=headers)
         if not response.ok:
             raise Exception(response.reason)
         response = response.json()
         data = response.get("data")
-        # author = Author.objects(username=data.get("username")).first()
-        # if author is None:
-        #     author = Author(author_id=data.get("id"), metrics=data.get("public_metrics"), created_at=data.get("created_at"), description=data.get("description"),
-        #                     location=data.get("location"), name=data.get("name"), username=data.get("username"), profile_image_url=data.get("profile_image_url"), verified=data.get("verified"))
-        #     author.save()
-        #     print(author)
         user = {
             'id': data.get("id"),
             'username': data.get("username")
@@ -757,8 +747,6 @@ def retrieve_timeline(author, project, params, headers, max_results=100, token=N
     if not id:
         return
     url = f"https://api.twitter.com/2/users/{id}/tweets"
-    # tweet = Tweet.objects(projects=project, author=author).order_by(
-    #     "-created_at").first()
     tweet = None
     params.update({
         'max_results': max_results,

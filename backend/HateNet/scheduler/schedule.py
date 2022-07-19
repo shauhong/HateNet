@@ -100,15 +100,14 @@ def get_jobs_id(project):
 @params_required
 def init_schedule(scheduler, app, params, headers):
     reset(scheduler)
-
-    # schedule_personal_projects(scheduler, params, headers)
-    # schedule_monitor_projects(scheduler, params, headers)
-    # schedule_historical_projects(scheduler, params, headers)
-    # schedule_volume_projects(scheduler, params, headers)
-    # schedule_filtered_projects(scheduler, params, headers)
-    # with app.app_context():
-    #     schedule_detect_projects(scheduler)
-    # schedule_aggregate_projects(scheduler)
+    schedule_personal_projects(scheduler, params, headers)
+    schedule_monitor_projects(scheduler, params, headers)
+    schedule_historical_projects(scheduler, params, headers)
+    schedule_volume_projects(scheduler, params, headers)
+    schedule_filtered_projects(scheduler, params, headers)
+    with app.app_context():
+        schedule_detect_projects(scheduler)
+    schedule_aggregate_projects(scheduler)
 
 
 def reset(scheduler):
@@ -296,11 +295,6 @@ def schedule_detect_projects(scheduler):
         scheduler.remove_job(id)
     scheduler.add_job(detect_projects, 'interval', days=1,
                       next_run_time=datetime.now(), misfire_grace_time=300, id=id, args=[current_app.models])
-    #
-
-# def schedule_detect_text(scheduler, project, id, minutes=15):
-#     scheduler.add_job(detect_text, 'interval', minutes=minutes, args=[
-#                       project, current_app.models['BERTweet'], current_app.device], id=id)
 
 
 def update_project(project, **kwargs):

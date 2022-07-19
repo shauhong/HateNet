@@ -170,52 +170,6 @@ def normalize_attention(attention):
     return attention
 
 
-# def attention_rollout_multimodal(attentions, image, resized, tokens, patch_size=32, mode="mean", normalize=True):
-#     attentions = torch.stack(attentions)  # 12, 1, 12, S, S
-#     attentions = torch.squeeze(attentions, dim=1)  # 12, 12, S, S
-#     if mode == 'mean':
-#         attentions = torch.mean(attentions, dim=1)  # 12, S, S
-#     elif mode == 'max':
-#         attentions = torch.max(attentions, dim=1)[0]  # 12, S, S
-#     elif mode == "min":
-#         attentions = torch.min(attentions, dim=1)[0]  # 12, S, S
-#     else:
-#         raise NotImplementedError(f"Mode {mode} not implemented")
-
-#     residual_attentions = torch.eye(attentions.shape[1])
-#     augmented_attentions = attentions + residual_attentions
-#     augmented_attentions = augmented_attentions / \
-#         torch.sum(augmented_attentions, dim=-1)[..., None]
-#     augmented_attentions = augmented_attentions.detach().numpy().copy()
-
-#     joint_attentions = np.zeros(augmented_attentions.shape)
-#     joint_attentions[0] = augmented_attentions[0]
-
-#     for i in range(1, augmented_attentions.shape[0]):
-#         joint_attentions[i] = np.matmul(
-#             augmented_attentions[i], joint_attentions[i-1])
-
-#     h_feat = resized.shape[0] // patch_size
-#     w_feat = resized.shape[1] // patch_size
-
-#     v = joint_attentions[-1]
-
-#     mask = v[0, -h_feat*w_feat:]
-#     if normalize:
-#         mask = mask / np.sum(mask)
-#     mask = mask / mask.max()
-#     mask = mask.reshape(h_feat, w_feat)
-#     mask = cv2.resize(mask, image.size)
-
-#     segments = segment_tokens_bert(tokens)
-#     attention = np.zeros(len(segments))
-#     for i, segment in enumerate(segments):
-#         attention[i] = np.sum(v[0, segment])
-#     attention = attention[1:-1]
-#     if normalize:
-#         attention = attention / np.sum(attention)
-
-#     return attention, mask
 def cluster_tokens(tokens, pattern="@@"):
     tokens = deepcopy(tokens)
     segments = list()
@@ -375,12 +329,8 @@ def attention_rollout_multimodal(attentions, image, shifted, patch_size, tokens,
         joint_attentions[i] = np.matmul(
             augmented_attentions[i], joint_attentions[i-1])
 
-#     h_feat = resized.shape[0] // patch_size
-#     w_feat = resized.shape[1] // patch_size
-
     v = joint_attentions[-1]
 
-#     mask = v[0, -patch_size[0]*patch_size[1]:]
     heatmap = sort_shifted_attentions(
         v[0, -patch_size[0] * patch_size[1]:], shifted)
 
@@ -411,7 +361,6 @@ def attention_rollout_multimodal(attentions, image, shifted, patch_size, tokens,
 
     if return_tokens:
         return list(zip(tokens[1:-1], attention)), heatmap
-#         return tokens, attention, mask
 
     return attention, heatmap
 
@@ -430,10 +379,6 @@ def attention_multimodal(attentions, image, shifted, patch_size, tokens, mode="m
     attentions = attentions[-1]  # S, S
     v = attentions.detach().numpy().copy()
 
-    # h_feat = resized.shape[0] // patch_size
-    # w_feat = resized.shape[1] // patch_size
-
-    # mask = v[0, -h_feat*w_feat:]
     heatmap = sort_shifted_attentions(
         v[0, -patch_size[0] * patch_size[1]:], shifted)
 
@@ -463,99 +408,6 @@ def attention_multimodal(attentions, image, shifted, patch_size, tokens, mode="m
 
     return attention, heatmap
 
-# def attention_rollout_multimodal(attentions, image, shifted, patch_size, tokens, mode="mean", normalize=True):
-#     attentions = torch.stack(attentions)  # 12, 1, 12, S, S
-#     attentions = torch.squeeze(attentions, dim=1)  # 12, 12, S, S
-#     if mode == 'mean':
-#         attentions = torch.mean(attentions, dim=1)  # 12, S, S
-#     elif mode == 'max':
-#         attentions = torch.max(attentions, dim=1)[0]  # 12, S, S
-#     elif mode == "min":
-#         attentions = torch.min(attentions, dim=1)[0]  # 12, S, S
-#     else:
-#         raise NotImplementedError(f"Mode {mode} not implemented")
-
-#     residual_attentions = torch.eye(attentions.shape[1])
-#     augmented_attentions = attentions + residual_attentions
-#     augmented_attentions = augmented_attentions / \
-#         torch.sum(augmented_attentions, dim=-1)[..., None]
-#     augmented_attentions = augmented_attentions.detach().numpy().copy()
-
-#     joint_attentions = np.zeros(augmented_attentions.shape)
-#     joint_attentions[0] = augmented_attentions[0]
-
-#     for i in range(1, augmented_attentions.shape[0]):
-#         joint_attentions[i] = np.matmul(
-#             augmented_attentions[i], joint_attentions[i-1])
-
-# #     h_feat = resized.shape[0] // patch_size
-# #     w_feat = resized.shape[1] // patch_size
-
-#     v = joint_attentions[-1]
-
-# #     mask = v[0, -patch_size[0]*patch_size[1]:]
-#     mask = sort_shifted_attentions(
-#         v[0, -patch_size[0] * patch_size[1]:], shifted)
-
-#     if normalize:
-#         mask = mask / np.sum(mask)
-#     mask = mask / mask.max()
-#     mask = mask.reshape(patch_size[1], patch_size[0])
-#     mask = cv2.resize(mask, image.size)
-
-#     segments = segment_tokens_bert(tokens)
-#     attention = np.zeros(len(segments))
-#     for i, segment in enumerate(segments):
-#         attention[i] = np.sum(v[0, segment])
-#     attention = attention[1:-1]
-
-#     if normalize:
-#         attention = attention / np.sum(attention)
-
-#     attention = attention.tolist()
-
-#     return attention, mask
-
-
-# def attention_multimodal(attentions, image, shifted, patch_size, tokens, mode="mean", normalize=True):
-#     attentions = torch.stack(attentions)  # 12, 1, 12, S, S
-#     attentions = torch.squeeze(attentions, dim=1)  # 12, 12, S, S
-#     if mode == 'mean':
-#         attentions = torch.mean(attentions, dim=1)  # 12, S, S
-#     elif mode == 'max':
-#         attentions = torch.max(attentions, dim=1)[0]  # 12, S, S
-#     elif mode == "min":
-#         attentions = torch.min(attentions, dim=1)[0]  # 12, S, S
-#     else:
-#         raise NotImplementedError(f"Mode {mode} not implemented")
-#     attentions = attentions[-1]  # S, S
-#     v = attentions.detach().numpy().copy()
-
-#     # h_feat = resized.shape[0] // patch_size
-#     # w_feat = resized.shape[1] // patch_size
-
-#     # mask = v[0, -h_feat*w_feat:]
-#     mask = sort_shifted_attentions(
-#         v[0, -patch_size[0] * patch_size[1]:], shifted)
-
-#     if normalize:
-#         mask = mask / np.sum(mask)
-#     mask = mask / mask.max()
-#     mask = mask.reshape(patch_size[1], patch_size[0])
-#     mask = cv2.resize(mask, image.size)
-
-#     segments = segment_tokens_bert(tokens)
-#     attention = np.zeros(len(segments))
-#     for i, segment in enumerate(segments):
-#         attention[i] = np.sum(v[0, segment])
-#     attention = attention[1:-1]
-
-#     if normalize:
-#         attention = attention / np.sum(attention)
-
-#     attention = attention.tolist()
-
-#     return attention, mask
 
 def normalize(text):
     text = re.sub("@\S+", "@USER", text)

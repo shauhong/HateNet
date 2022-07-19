@@ -8,7 +8,6 @@ from HateNet.models.utils import normalize
 
 
 def detect_projects(models, device="cpu"):
-    print("Detect Projects Start")
     projects = Project.objects()
     for project in projects:
         tweets = Tweet.objects(projects=project, result="None", media__size=0)
@@ -16,7 +15,6 @@ def detect_projects(models, device="cpu"):
         tweets = Tweet.objects(
             projects=project, result="None", media__not__size=0)
         inference_multimodal(models['ViLT'], tweets)
-    # pass
 
 
 def inference_text(model, tweets, batch_size=8, device="cpu"):
@@ -30,7 +28,6 @@ def inference_text(model, tweets, batch_size=8, device="cpu"):
                 for tweet, result in zip(batch, results):
                     tweet.result = result
                     tweet.save()
-                print("Inferenced Text")
                 batch.clear()
 
 
@@ -46,7 +43,6 @@ def inference_multimodal(model, tweets, batch_size=8, device="cpu"):
                 for tweet in batch:
                     response = requests.get(tweet.media[0].url, stream=True)
                     if not response.ok:
-                        print("Invalid Image")
                         continue
                     image = Image.open(response.raw).convert("RGB")
                     valid.append(tweet)
@@ -58,26 +54,7 @@ def inference_multimodal(model, tweets, batch_size=8, device="cpu"):
                     for tweet, result in zip(valid, results):
                         tweet.result = result
                         tweet.save()
-                print("Inferenced Multimodal")
                 batch.clear()
-
-                # try:
-                #     images = [np.array(Image.open(BytesIO(tweet.media[0].image.read())).convert(
-                #         "RGB")) for tweet in batch]
-                #     texts = [normalize(tweet.text) for tweet in batch]
-                #     inputs = model.processor(
-                #         images, texts, return_tensors="pt", truncation=True)
-                #     results = model.inference(inputs, device=device)
-
-                #     for tweet, result in zip(batch, results):
-                #         tweet.result = result
-                #         tweet.save()
-                #     print("Inferenced Multimodal")
-                #     batch.clear()
-                # except Exception as e:
-                #     print(e)
-                #     batch.clear()
-                #     continue
 
 
 def detect_text(project, model, device="cpu", batch_size=8):

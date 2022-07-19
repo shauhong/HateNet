@@ -82,4 +82,3 @@ def refresh():
         g.user.refresh_token = token.get("refresh_token")
         g.user.save()
     return jsonify(success=True), 200
-    # return jsonify(g.user)

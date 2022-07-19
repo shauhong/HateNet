@@ -4,7 +4,7 @@ import os
 from flask import Blueprint, abort, g, jsonify, request
 
 from HateNet.database.schema import Aggregate, Author, Tweet
-from HateNet.utils.compute import compute_activity, compute_influence, compute_progress, compute_summary
+from HateNet.utils.compute import compute_influence, compute_progress, compute_summary
 from HateNet.utils.file import parse_json
 from HateNet.utils.tfidf import compute_c_tf_idf
 from HateNet.utils.wrappers import project_existed, login_required
@@ -90,10 +90,6 @@ def get_tweets(project):
             if scope == 'all':
                 tweets = Tweet.objects(
                     projects=project, text__contains=term).order_by(sort).allow_disk_use(enabled=True)
-                # print(start)
-                # print(end)
-                # for tweet in tweets:
-                #     print(tweet.text)
 
             if scope == 'tweet':
                 author = Author.objects(

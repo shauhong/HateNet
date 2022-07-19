@@ -49,7 +49,6 @@ def project_existed(view):
             'project': project
         })
         return view(*args, **kwargs)
-        # return view(project, *args, **kwargs)
     return wrapped_view
 
 

@@ -4,6 +4,6 @@ from flask_mongoengine import MongoEngine
 
 def init(app):
     app.config['MONGODB_SETTINGS'] = {
-        'host': f'mongodb+srv://{os.environ.get("USERNAME")}:{os.environ.get("PASSWORD")}@cluster0.hft3t.mongodb.net/{os.environ.get("DATABASE")}.?retryWrites=true&w=majority'
+        'host': f'mongodb+srv://{os.environ.get("MONGO_USERNAME")}:{os.environ.get("MONGO_PASSWORD")}@cluster0.hft3t.mongodb.net/{os.environ.get("MONGO_DATABASE")}.?retryWrites=true&w=majority'
     }
     app.db = MongoEngine(app)
