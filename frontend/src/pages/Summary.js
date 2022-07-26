@@ -39,7 +39,7 @@ const Summary = () => {
     });
     const { pathname } = useLocation();
     const navigate = useNavigate();
-    const { aggregate, fetchAggregate, user, fetchUser, loading, fetchTimeline, TFIDF, fetchTFIDF } = useData();
+    const { aggregate, fetchAggregate, user, fetchUser, loading, TFIDF, fetchTFIDF } = useData();
     const { project, fetchProject } = useProject();
     const { chart: distribution, updateDistribution } = useChart();
     const { chart: trend, updateTrend } = useChart();
@@ -65,7 +65,6 @@ const Summary = () => {
             fetchAggregate(project.name, 'all');
             fetchAggregate(project.name, 'tweet');
             fetchAggregate(project.name, 'reply');
-            // fetchTimeline(project.name, project.user.twitter_username);
             navigate(`${project.user.twitter_username}`);
             const username = project.user.twitter_username;
             if (username) {

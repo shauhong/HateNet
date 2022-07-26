@@ -12,8 +12,6 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
     const [explain, setExplain] = useState({
         attention: [],
         mask: null,
-        // tokens: [],
-        // boxes: [],
     });
     const canvasRef = useRef(null);
     const imgRef = useRef(null);
@@ -21,7 +19,6 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
     const { closeModal } = useGlobal();
     const { explainText, explainMultimodal, loading } = useData();
     const colorMap = {
-        // 0: "#f0f9ff",
         0: "#ffffff",
         1: "#e0f2fe",
         2: "#bae6fd",
@@ -40,7 +37,6 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
         if (canvas) {
             let image = new Image();
             image.src = tweet.media[0].url;
-            // console.log(tweet.media[0].url)
             const context = canvas.getContext("2d");
             image.onload = () => {
                 canvas.height = image.height;
@@ -59,14 +55,7 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
             image.src = tweet.media[0].url;
             const context = canvas.getContext("2d");
             context.globalAlpha = 0.2;
-            // console.log(image);
-            // context.drawImage(image, 0, 0);
-            // image.onload = () => {
-            //     context.globalAlpha = 1.0;
-            //     context.drawImage(image, 0, 0);
-            // }
             mask.onload = () => {
-                // console.log(image)
                 context.globalAlpha = 0.2;
                 canvas.height = mask.height;
                 canvas.width = mask.width;
@@ -75,22 +64,6 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
 
         }
     }, [explain.mask])
-
-    // useEffect(() => {
-    //     const canvas = canvasRef.current;
-    //     if (canvas) {
-    //         const context = canvas.getContext("2d");
-    //         explain.boxes.forEach((box, index) => {
-    //             const attention = Math.floor(explain.attention.slice(explain.tokens.length)[index] * 10);
-    //             context.fillStyle = colorMap[attention];
-    //             context.globalAlpha = 0.5;
-    //             const [x1, y1, x2, y2] = box;
-    //             const w = x2 - x1;
-    //             const h = y2 - y1
-    //             context.fillRect(x1, y1, w, h);
-    //         });
-    //     }
-    // }, [explain.boxes]);
 
     const handleError = (e) => {
         e.target.src = logo;
@@ -116,20 +89,9 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
         e.stopPropagation();
         if (tweet.media.length >= 1) {
             let { attentions, mask } = await explainMultimodal(tweet.text, tweet.media[0].url);
-            // attention = [...]
-            // attention = [...attention.slice(1, tokens.length - 1), ...attention.slice(tokens.length)];
-            // tokens = tokens.slice(1, tokens.length - 1);
             setExplain({ attention: attentions, mask });
         } else {
-            // let { attention, tokens } = await explainText(tweet.text);
             let { attentions } = await explainText(tweet.text);
-            // attention = attention.slice(1, attention.length - 1);
-            // attention = attention.map(element => element * 10);
-            // tokens = tokens.slice(1, tokens.length - 1);
-            // console.log(attentions);
-            // console.log(tokens);
-
-            // setExplain({ ...explain, attention, tokens });
             setExplain({ ...explain, attention: attentions });
 
         }
@@ -179,19 +141,10 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                                 {
                                     explain.attention.length > 0
                                         ? explain.attention.map((element, index) => {
-
-                                            // console.log(explain.attention[index]);
-                                            // console.log(element)
                                             const text = element[0];
                                             const attention = element[1];
-                                            // let weight = Math.max(Math.floor(explain.attention[index] * 10) - 1, 0);
-                                            // let weight = Math.floor(explain.attention[index] * 10);
                                             let weight = Math.floor(attention * 10);
-                                            // let weight = explain.attention[index];
                                             weight = Math.min(weight, 9);
-                                            // weight = weight * 100;
-                                            // console.log(element);
-                                            // console.log(weight);
                                             return (
                                                 <div className="inline" key={index}>
                                                     <span style={{ backgroundColor: colorMap[weight] }} className="rounded-md z-30">{text}</span>
@@ -199,23 +152,6 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                                                 </div>
                                             );
                                         })
-                                        // tweet.text.split(" ").map((element, index) => {
-                                        //     console.log(explain.attention[index]);
-                                        //     // let weight = Math.max(Math.floor(explain.attention[index] * 10) - 1, 0);
-                                        //     let weight = Math.floor(explain.attention[index] * 10);
-                                        //     // let weight = explain.attention[index];
-                                        //     weight = Math.min(weight, 9);
-                                        //     // weight = weight * 100;
-                                        //     console.log(element);
-                                        //     // console.log(weight);
-                                        //     return (
-                                        //         <div className="inline" key={index}>
-                                        //             {/* <span style={{ backgroundColor: colorMap[weight] }} className={`bg-slate-${weight} rounded-md z-30`}>{element}</span> */}
-                                        //             <span style={{ backgroundColor: colorMap[weight] }} className="rounded-md z-30">{element}</span>
-                                        //             <span> </span>
-                                        //         </div>
-                                        //     );
-                                        // })
                                         : tweet.text
                                 }
                             </div>
@@ -234,7 +170,6 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                                                 alt=""
                                                 className="col-span-1 rounded-l-3xl object-cover w-full h-full"
                                             />
-                                            {/* <canvas ref={canvasRef} className="rounded-3xl object-cover w-full h-full" /> */}
                                         </div>
                                         : tweet.media.length === 2
                                             ? <div className="rounded-3xl grid grid-cols-2 max-h-96 overflow-y-auto">
@@ -331,7 +266,6 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                                 className="col-span-3 hidden md:flex items-center gap-x-1 overflow-hidden cursor-pointer group"
                                 data-tip="Explain"
                                 onClick={tweet.result !== "Non-Hateful" && handleExplain}
-                            // onClick={handleExplain}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="flex-initial min-w-[1rem] h-4 w-4 fill-gray-500 opacity-70 group-hover:fill-sky-500" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
@@ -355,7 +289,6 @@ const Post = ({ tweet, clickable, modal, toggable, reply, store }) => {
                 <div className="">
                     <Pie
                         data={{
-                            // labels: Object.keys(tweet.influence).filter((element, index) => tweet.influence[element] > 0),
                             labels: Object.keys(tweet.influence),
                             datasets: [
                                 {

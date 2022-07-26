@@ -318,7 +318,6 @@ const useChart = () => {
         const values = keys.map(key => updated[key]);
         chart.labels = keys;
         chart.data = values;
-        console.log(chart);
         setChart({ ...chart });
     }
 

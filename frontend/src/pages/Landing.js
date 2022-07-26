@@ -3,7 +3,7 @@ import { Header } from '../components';
 import { useGlobal } from '../hooks';
 
 const Landing = () => {
-    let [params, setParams] = useSearchParams();
+    let [params, _] = useSearchParams();
     const { auth } = useGlobal();
 
     return (

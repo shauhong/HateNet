@@ -10,7 +10,7 @@ const Project = () => {
         'Date - Ascending',
         'Date - Descending',
     ]
-    const { openModal, openToast } = useGlobal();
+    const { openModal } = useGlobal();
     const [type, setType] = useState('all');
     const [filteredProjects, setFilteredProjects] = useState([]);
     const [order, setOrder] = useState(orders[0]);

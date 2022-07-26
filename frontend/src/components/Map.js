@@ -1,12 +1,8 @@
 
 import { ComposableMap, ZoomableGroup, Geographies, Geography } from 'react-simple-maps';
 import { scaleQuantile } from 'd3-scale';
-import { features } from '../utils/features.json';
 
 const Map = ({ setToolTipContent, data, labels }) => {
-    console.log(data);
-    // const url = "https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json";
-    // const url = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
     const colorScale = scaleQuantile().domain(data).range([
         '#f0f9ff',
         '#e0f2fe',
@@ -27,8 +23,6 @@ const Map = ({ setToolTipContent, data, labels }) => {
                     {
                         ({ geographies }) =>
                             geographies.map(geography => {
-                                console.log(geography);
-                                console.log(labels);
                                 const current = labels.find(element => element === geography.id);
                                 return (
                                     <Geography

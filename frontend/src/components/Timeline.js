@@ -33,28 +33,14 @@ const Timeline = () => {
     }, [username]);
 
     useEffect(() => {
-        // if (page !== undefined) {
-        //     console.log("fetchPage");
-        //     console.log(`page: ${page}`);
-        //     fetchPage(page);
-        // }
-        // console.log("fetchPage");
-        // console.log(`page: ${page}`);
-
         if (!last) {
             fetchPage(page);
         }
-
-        // if(timeline.hasOwnProperty(username) && timeline[username].next) {
-        //     fetchPage(page);
-        // }
-
     }, [page, last]);
 
     const fetchPage = async (page) => {
         const next = await fetchTimeline(project.name, username, page, 25);
         if (next !== undefined) {
-            console.log("set next");
             setLast(!next);
         }
     }

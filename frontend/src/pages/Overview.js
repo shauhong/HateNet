@@ -30,7 +30,6 @@ const Overview = () => {
 
     useEffect(() => {
         if (project && aggregate[project.name] && aggregate[project.name]['all']) {
-            console.log(aggregate)
             updateTrend(aggregate[project.name]['all'].aggregate, filter.activity.time);
         }
     }, [aggregate, project, filter]);
@@ -115,7 +114,6 @@ const Overview = () => {
                                     datasets: [
                                         {
                                             data: project && progress[project.name] ? [progress[project.name]['completed'], progress[project.name]['progress']] : [0, 0],
-                                            // data: [100, 0],
                                             backgroundColor: [
                                                 'rgb(14, 165, 233)',
                                                 'rgb(241, 241, 241)'

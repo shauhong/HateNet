@@ -58,7 +58,6 @@ const useData = () => {
                     aggregate[project] = {};
                 }
                 aggregate[project][kind] = data;
-                console.log(aggregate);
                 setAggregate({ ...aggregate });
             } catch (error) {
                 const message = {
@@ -163,18 +162,14 @@ const useData = () => {
     }
 
     const fetchTimeline = async (project, username, page, results) => {
-        // if (!timeline.hasOwnProperty(username) || timeline[username].length < page * results) {
         if (!timeline.hasOwnProperty(username) || timeline[username].next) {
             try {
                 setLoading({ ...loading, timeline: true });
-                console.log(`page: ${page}`);
-                console.log(`results: ${results}`);
                 const response = await fetch(`/data/${encodeURIComponent(project)}/${encodeURIComponent(username)}/timeline?` + new URLSearchParams({ page, results }));
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const { tweets, next } = await response.json();
-                console.log(`next: ${next}`);
                 setLoading({ ...loading, timeline: false });
                 const parsed = tweets.map(tweet => parseTweet(tweet));
                 if (!timeline.hasOwnProperty(username)) {
@@ -185,16 +180,9 @@ const useData = () => {
                 }
                 timeline[username].tweets = timeline[username].tweets.concat(parsed);
                 timeline[username].next = next;
-                // if (username in timeline) {
-                //     timeline[username] = timeline[username].concat(parsed);
-                // } else {
-                //     timeline[username] = parsed;
-                // }
-                console.log(timeline)
                 setTimeline({ ...timeline });
                 return next;
             } catch (error) {
-                console.log(error);
                 const message = {
                     type: 'fail',
                     content: 'Failed to fetch timeline'
@@ -307,7 +295,6 @@ const useData = () => {
     }
 
     const fetchBlocks = async () => {
-        // if (blocks.length === 0) {
         if (!blocks.retrieved) {
             try {
                 const response = await fetch("/block/");
@@ -322,7 +309,7 @@ const useData = () => {
                     type: "fail",
                     content: "Failed to retrieve blocking list"
                 };
-                // openToast(message);
+                openToast(message);
             }
         }
     }
@@ -344,11 +331,8 @@ const useData = () => {
             if (!response.ok) {
                 throw new Error(`HTTP status: ${response.status}`);
             }
-            // setBlocks((blocks) => [...blocks, username]);
-            // setBlocks((blocks)=>)
             blocks.users = [...blocks.users, username];
             setBlocks({ ...blocks });
-            // setBlocks({users: [...blocks.users, username]})
             const message = {
                 type: "success",
                 content: `Successfully blocked ${username}`
@@ -382,7 +366,6 @@ const useData = () => {
             }
             blocks.users = blocks.users.filter(block => block !== username);
             setBlocks({ ...blocks });
-            // setBlocks((blocks) => [...blocks.filter(block => block !== username)]);
             const message = {
                 type: "success",
                 content: `Successfully unblocked ${username}`
@@ -450,14 +433,8 @@ const useData = () => {
                 throw new Error(`HTTP error: ${response.status}`);
             }
             const { attentions } = await response.json();
-            console.log(attentions);
-            // const { attention, tokens } = await response.json();
-            console.log(attentions.reduce((total, ele) => total + ele[1], 0))
-            // console.log(attentions)
-            // console.log(tokens);
             setLoading({ ...loading, explain: false });
             return { attentions };
-            // return { attention, tokens }
         } catch (error) {
             const message = {
                 type: "fail",
@@ -485,13 +462,7 @@ const useData = () => {
                 throw new Error(`HTTP error: ${response.status}`);
             }
             const { attentions, mask } = await response.json();
-            // console.log(attentions);
-            // console.log(mask);
-            // console.log(attention);
-            // console.log(mask);
-            // const { attention, tokens, boxes } = await response.json();
             setLoading({ ...loading, explain: false });
-            // return { attention, tokens, boxes }
             return { attentions, mask }
         } catch (error) {
             const message = {

@@ -6,26 +6,12 @@ const useAuth = () => {
     const { openToast } = useGlobal();
 
     const register = async (username, password, email, type) => {
-        // const payload = {};
-        // const elements = [username, password, email, type];
-        // for (let element of [username, password, email, type]) {
-        //     if(element) {
-        //         payload.element = element
-        //     }
-        // }
         const payload = {
             username: username,
             password: password,
             email: email,
             user_type: type,
         };
-        // if (email) {
-        //     payload.email = email;
-        // }
-        // if (type) {
-        //     payload.user_type = type;
-        // }
-        console.log(payload);
         const headers = new Headers({
             'Content-Type': 'application/json'
         });
