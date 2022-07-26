@@ -1,6 +1,6 @@
 # HateNet
 <p>
-  HateNet is a web application for hate speech detection on Twitter. HateNet uses the state-of-the-art vision-and-language model, VisualBERT 
+  HateNet is a web application for hate speech detection on Twitter. HateNet uses the state-of-the-art vision-and-language multimodal model, ViLT 
   to detect multimodal hate speech. HateNet is also capable of analysis and monitoring hate speech.
 </p>
 
@@ -19,6 +19,29 @@
 <li><a href="https://www.mongodb.com/">MongoDB</a></li>
 <li><a href="https://docs.mongoengine.org/">MongoEngine</a></li>
 
+## Prerequisites
+<li>Python 3.8+</li>
+<li>NodeJS 18.3.0+</li>
+
+## Installation
+### Backend
+1. cd backend
+2. pip install -r requirements.txt
+
+### Frontend
+1. cd frontend
+2. npm install
+
+## Run
+### Backend
+1. cd backend/HateNet
+2. export FLASK_APP=HateNet
+3. export FLASK_ENV=development
+4. flask run
+
+### Frontend
+1. cd frontend
+2. npm start
 
 ## Screenshots
 ### Web
